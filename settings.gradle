@@ -1,0 +1,4 @@
+rootProject.name = 'mars-explorer'
+include 'me-backend'
+include 'me-frontend'
+

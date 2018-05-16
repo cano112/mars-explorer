@@ -1,0 +1,10 @@
+.idea
+.gradle
+gradle
+target/
+build/
+/dist
+docker/data
+
+
+

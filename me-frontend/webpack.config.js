@@ -2,6 +2,10 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
+  node: {
+    fs:'empty',
+    child_process: 'empty'
+  },
   entry: './src/main.js',
   output: {
     path: path.resolve(__dirname, './target/dist'),

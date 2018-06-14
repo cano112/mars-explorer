@@ -1,19 +1,21 @@
 import axios from 'axios';
 /**
  * Simple class that allows us to view photos by its properties
- *  API https://api.nasa.gov/api.html#Images egzamples:
+ *  API https://api.nasa.gov/api.html#Images examples:
  * - QUERY https://images-api.nasa.gov/search?q=curiosity%20photos
  * - MANIFEST FROM ROVER CURIOSITY https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
  * - ROVERS https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
  * - PHOTOS for sol = 0 https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
- *
  */
+
 export class WrapperNASAMarsAPI {
+
+  /**
+   * @return Rover []
+   */
   static getAllCuriosityImages() {
-    /**
-     * @return Rover []
-     */
-    getRovers()
+
+    return getRovers();
     return ["aaa", "bbbb"];
   }
 
@@ -51,6 +53,7 @@ export class Camera {
 
 
 }
+
 
 export class Rover{
 

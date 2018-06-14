@@ -1,0 +1,19 @@
+{
+  "name": "mars-explorer",
+  "version": "1.0.0",
+  "description": "https://mars-x.herokuapp.com/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cano112/mars-explorer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cano112/mars-explorer/issues"
+  },
+  "homepage": "https://github.com/cano112/mars-explorer#readme"
+}

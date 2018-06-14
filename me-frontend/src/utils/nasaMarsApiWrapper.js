@@ -8,12 +8,12 @@ import axios from 'axios';
  * - PHOTOS for sol = 0 https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
  *
  */
-export class WrapperNASAMarsAPI {
+export class NasaMarsApiWrapper {
   static getAllCuriosityImages() {
     /**
      * @return Rover []
      */
-    getRovers()
+    NasaMarsApiWrapper.getRovers();
     return ["aaa", "bbbb"];
   }
 
@@ -145,11 +145,8 @@ export const Statics  = {
       URI : "manifest/" ,
       endpoints: this.rovers,
     }
-
   },
-
-
-}
+};
 
 
 

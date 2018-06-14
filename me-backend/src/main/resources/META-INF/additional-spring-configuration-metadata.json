@@ -9,5 +9,45 @@
       "name": "mars.explorer.nasa.api.url",
       "type": "java.lang.String",
       "description": "Nasa API URL."
+    },
+    {
+      "name": "facebook.client.client-id",
+      "type": "java.lang.String",
+      "description": "Facebook Client ID."
+    },
+    {
+      "name": "facebook.client.client-secret",
+      "type": "java.lang.String",
+      "description": "Facebook client secret."
+    },
+    {
+      "name": "facebook.client.access-token-uri",
+      "type": "java.lang.String",
+      "description": "Facebook token URI."
+    },
+    {
+      "name": "facebook.client.userAuthorizationUri",
+      "type": "java.lang.String",
+      "description": "Description for facebook.client.userAuthorizationUri."
+    },
+    {
+      "name": "facebook.client.tokenName",
+      "type": "java.lang.String",
+      "description": "Description for facebook.client.tokenName."
+    },
+    {
+      "name": "facebook.client.authenticationScheme",
+      "type": "java.lang.String",
+      "description": "Description for facebook.client.authenticationScheme."
+    },
+    {
+      "name": "facebook.client.clientAuthenticationScheme",
+      "type": "java.lang.String",
+      "description": "Description for facebook.client.clientAuthenticationScheme."
+    },
+    {
+      "name": "facebook.resource.user-info-uri",
+      "type": "java.lang.String",
+      "description": "Description for facebook.resource.user-info-uri."
     }
   ] }

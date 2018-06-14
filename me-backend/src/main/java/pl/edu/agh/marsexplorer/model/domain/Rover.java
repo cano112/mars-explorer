@@ -1,6 +1,8 @@
-package pl.edu.agh.marsexplorer.model;
+package pl.edu.agh.marsexplorer.model.domain;
 
-import static pl.edu.agh.marsexplorer.model.CameraType.*;
+import pl.edu.agh.marsexplorer.model.domain.CameraType;
+
+import static pl.edu.agh.marsexplorer.model.domain.CameraType.*;
 
 public enum Rover {
     CURIOSITY("Curiosity", FHAZ, RHAZ, MAST, CHEMCAM, MAHLI, MARDI, NAVCAM),

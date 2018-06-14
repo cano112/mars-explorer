@@ -20,8 +20,8 @@ public class NasaApiProxyService implements ProxyService {
     private final String apiUrl;
     private final RestTemplate restTemplate;
 
-    public NasaApiProxyService(@Value("${mars.explorer.nasa.api.key}") String apiKey,
-                               @Value("${mars.explorer.nasa.api.url}") String apiUrl,
+    public NasaApiProxyService(@Value("${mars.explorer.nasa.api.key:DEMO_KEY}") String apiKey,
+                               @Value("${mars.explorer.nasa.api.url:https://api.nasa.gov/mars-photos/api/v1/}") String apiUrl,
                                RestTemplate restTemplate) {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;

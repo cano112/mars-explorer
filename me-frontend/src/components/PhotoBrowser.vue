@@ -29,7 +29,7 @@
 </template>
 
 <script>
-  import { PhotoManifest,Statics, Camera, WrapperNASAMarsAPI }  from "../utils/wrapperNASAMarsAPI"
+  import { PhotoManifest,Statics, Camera, NasaMarsApiWrapper }  from "../utils/nasaMarsApiWrapper"
   import RoverTemplate from './RoverTemplate.vue';
 
   //TODO add component rover-template
@@ -40,7 +40,7 @@
     created(){
       console.log("hello init");
       console.log(this.$data);
-      WrapperNASAMarsAPI.getRovers(this.$data);
+      NasaMarsApiWrapper.getRovers(this.$data);
       console.log("end init");
     },
     data(){

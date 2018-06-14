@@ -7,6 +7,7 @@ import axios from 'axios';
  * - ROVERS https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
  * - PHOTOS for sol = 0 https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
  */
+<<<<<<< HEAD:me-frontend/src/utils/wrapperNASAMarsAPI.js
 
 export class WrapperNASAMarsAPI {
 
@@ -16,6 +17,14 @@ export class WrapperNASAMarsAPI {
   static getAllCuriosityImages() {
 
     return getRovers();
+=======
+export class NasaMarsApiWrapper {
+  static getAllCuriosityImages() {
+    /**
+     * @return Rover []
+     */
+    NasaMarsApiWrapper.getRovers();
+>>>>>>> 0d49b57dd90a128b98bc0836deb1db4191efeaf8:me-frontend/src/utils/nasaMarsApiWrapper.js
     return ["aaa", "bbbb"];
   }
 
@@ -148,11 +157,8 @@ export const Statics  = {
       URI : "manifest/" ,
       endpoints: this.rovers,
     }
-
   },
-
-
-}
+};
 
 
 

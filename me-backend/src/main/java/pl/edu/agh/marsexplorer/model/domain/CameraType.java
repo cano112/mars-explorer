@@ -1,4 +1,4 @@
-package pl.edu.agh.marsexplorer.model;
+package pl.edu.agh.marsexplorer.model.domain;
 
 public enum CameraType {
 

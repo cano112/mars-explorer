@@ -1,5 +1,6 @@
-package pl.edu.agh.marsexplorer.model;
+package pl.edu.agh.marsexplorer.model.domain;
 
+import com.google.common.base.Objects;
 import org.springframework.data.annotation.Id;
 
 public class Photo {
@@ -63,23 +64,16 @@ public class Photo {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Photo photo = (Photo) o;
-
-        if (sol != photo.sol) return false;
-        if (id != null ? !id.equals(photo.id) : photo.id != null) return false;
-        if (rover != photo.rover) return false;
-        if (cameraType != photo.cameraType) return false;
-        return url != null ? url.equals(photo.url) : photo.url == null;
+        return sol == photo.sol &&
+                Objects.equal(id, photo.id) &&
+                rover == photo.rover &&
+                cameraType == photo.cameraType &&
+                Objects.equal(url, photo.url);
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (rover != null ? rover.hashCode() : 0);
-        result = 31 * result + (cameraType != null ? cameraType.hashCode() : 0);
-        result = 31 * result + sol;
-        result = 31 * result + (url != null ? url.hashCode() : 0);
-        return result;
+        return Objects.hashCode(id, rover, cameraType, sol, url);
     }
 }

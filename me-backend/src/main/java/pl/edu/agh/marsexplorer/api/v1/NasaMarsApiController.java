@@ -12,12 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1")
-public class NasaMarsApiProxyController {
+public class NasaMarsApiController {
 
     private final ProxyService proxyService;
 
     @Autowired
-    public NasaMarsApiProxyController(ProxyService proxyService) {
+    public NasaMarsApiController(ProxyService proxyService) {
         this.proxyService = proxyService;
     }
 

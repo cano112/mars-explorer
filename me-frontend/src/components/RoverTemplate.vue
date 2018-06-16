@@ -2,91 +2,85 @@
   <div id="rover-template">
     <h1>Prop value is {{roverName}}</h1>
     <div>
-      <b-carousel id="carousel1"
+      <b-carousel :id="`carousel${roverName}`"
                   data-wrap = false
                   style="text-shadow: 1px 1px 2px #333;"
                   controls
-                  label-prev="dad"
-                  label-next="dasd"
-                  label-goto-slide="dsda"
                   background="#ababab"
                   img-width="1024"
                   img-height="480"
                   v-model="slide"
+                  comment = '
+                  keyboard=false
+                  cycling=false
+                  '
+                  indicators
                   @sliding-start="onSlideStart"
                   @sliding-end="onSlideEnd"
       >
-        <!-- Text slides with image -->
-        <b-carousel-slide caption="First slide"
-                          text="Nulla vitae elit libero, a pharetra augue mollis interdum."
+        <b-carousel-slide v-for="image in images" :caption="`1Images placeholder ${image}`"
+                          text="Nulla vitae elit libero, a pharetra augue mollis interdum. "
                           img-src="https://picsum.photos/1024/480/?image=52"></b-carousel-slide>
-
-        <b-carousel-slide caption="First222 slide"
-                          text="Nulla vitae elit libero, a pharetra augue mollis interdum."
-                          img-src="https://picsum.photos/1024/480/?image=52"></b-carousel-slide>
-
-
-
-  <!--      &lt;!&ndash; Slides with custom text &ndash;&gt;
-        <b-carousel-slide img-src="https://picsum.photos/1024/480/?image=54">
-          <h1>Hello world!</h1>
-        </b-carousel-slide>
-
-        &lt;!&ndash; Slides with image only &ndash;&gt;
-        <b-carousel-slide img-src="https://picsum.photos/1024/480/?image=58">
-        </b-carousel-slide>
-
-        &lt;!&ndash; Slides with img slot &ndash;&gt;
-        &lt;!&ndash; Note the classes .d-block and .img-fluid to prevent browser default image alignment &ndash;&gt;
-        <b-carousel-slide>
-          <img slot="img" class="d-block img-fluid w-100" width="1024" height="480"
-               src="https://picsum.photos/1024/480/?image=55" alt="image slot">
-        </b-carousel-slide>
-
-        &lt;!&ndash; Slide with blank fluid image to maintain slide aspect ratio &ndash;&gt;
-        <b-carousel-slide caption="Blank Image" img-blank img-alt="Blank image">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-            eros felis, tincidunt a tincidunt eget, convallis vel est. Ut pellentesque
-            ut lacus vel interdum.
-          </p>
-        </b-carousel-slide>-->
 
       </b-carousel>
-
-      <p class="mt-4">
-        Slide #: {{ slide }}<br>
-        Sliding: {{ sliding }}
-      </p>
     </div>
   </div>
 </template>
 <script>
+  import { PhotoManifest,Statics, Camera, NasaMarsApiWrapper,Pho }  from "../utils/nasaMarsApiWrapper"
   export default {
     name: 'rover-template',
     props: ['roverName'],
+    created(){
+      console.log("created rover tab with slider");
+      NasaMarsApiWrapper.getManifestByRover(this.$data.photoManifest, this.roverName);
+    },
     data (){
       return {
         slide :0,
         sliding: null,
-        images: [],
+        images: ["iAmObjectOf1stImage1","iAmObjectOf2ndImage2","iAmObjectOf2ndImage3","iAmObjectOf2ndImage4","iAmObjectOf2ndImage5"],
         isCycling: false,
+        photoManifest:{},
+        query:{},
+        counter : 0,
+        imageRequester: {}
       }
     },
 
     methods: {
       onSlideStart (slide) {
-        console.log(slide);
-        this.sliding = true
+        this.sliding = true;
+        return false;
       },
       onSlideEnd (slide) {
-        this.sliding = false
+        this.sliding = false;
+        return false;
+      },
+      loadNewImages (){
+        this.images.push("newImagePushed" + this.counter)
       }
     },
-    computed () {
-      return {
-        isCycling:false,
+
+    //WARNING NEVER USE value :() => {} it cause vue this returning {a:VueObject}}
+    // https://vuejs.org/v2/api/#watch
+    watch : {
+      slide (newV,oldV){
+        console.log(this);
+
+        if ( newV > oldV  && (this.$data.slide + 1)  >= this.$data.images.length ){
+          this.loadNewImages();
+        }
+      },
+      photoManifest(){
+        console.log("Changed Manifest")
       }
     }
+
+    /*,
+    computed : {
+        isCycling:  false
+    }*/
+
   }
 </script>

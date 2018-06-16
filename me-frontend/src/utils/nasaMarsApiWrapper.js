@@ -4,9 +4,12 @@ import axios from 'axios';
  * Simple class that allows us to view photos by its properties
  *  API https://api.nasa.gov/api.html#Images examples:
  * - QUERY https://images-api.nasa.gov/search?q=curiosity%20photos
- * - MANIFEST FROM ROVER CURIOSITY https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
- * - ROVERS https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
- * - PHOTOS for sol = 0 https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
+ * - MANIFEST FROM ROVER CURIOSITY
+ *      https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ * - ROVERS
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ * - PHOTOS for sol = 0
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
  */
 
 
@@ -29,7 +32,7 @@ export class NasaMarsApiWrapper {
     axios.get(uri, {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        "dasdadad" : "bye"
+        "dasdadad": "bye"
       }
     }).then(response => {
       console.log("RESPONSE:: ");
@@ -40,9 +43,36 @@ export class NasaMarsApiWrapper {
     })
   }
 
-  static getCuriosityManifest(response) {
-      return NasaMarsApiWrapper.request(Statics.URI + Statics.endpoints.manifest.curiosity,{},response);
+  static getManifest(x) {
+    console.log("MANIFEST");
+    console.log(x);
+    return new PhotoManifest(x.photo_manifest);
   }
+
+
+  static getManifestByRover(responseTo, rover) {
+
+    let roverName = rover.toLowerCase();
+    if (Statics.endpoints.manifest.hasOwnProperty(roverName)) {
+      NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest[roverName], {}, responseTo, NasaMarsApiWrapper.getManifest);
+    }
+    else {
+      throw new InvalidRequestException("invalid rover name");
+    }
+  }
+
+  static getCuriosityManifest(response) {
+    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.curiosity, {}, response, NasaMarsApiWrapper.getManifest);
+  }
+
+  static getOpportunityManifest(response) {
+    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.opportunity, {}, response, NasaMarsApiWrapper.getManifest);
+  }
+
+  static getSpiritManifest(response) {
+    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.spirit, {}, response, NasaMarsApiWrapper.getManifest);
+  }
+
 
   static parseUrlQuery(url, query) {
     //TODO change
@@ -84,7 +114,7 @@ export class NasaMarsApiWrapper {
         request.sol = requestObject.query.sol.getNumber();
       }
 
-      if ( PhotoRequest.validDateOrNull(requestObject.query.earth_date) != null) {
+      if (PhotoRequest.validDateOrNull(requestObject.query.earth_date) != null) {
         request.date = Utils.dateToIsoDateString(requestObject.query.earth_date)
       }
 
@@ -108,7 +138,7 @@ export class NasaMarsApiWrapper {
 
   }
 
-  static request(url, query,responseX) {
+  static request(url, query, responseX) {
     console.log("REQUEST ");
     // query.api_key = Statics.api_key;
     let s = NasaMarsApiWrapper.parseUrlQuery(url, query);
@@ -116,7 +146,7 @@ export class NasaMarsApiWrapper {
     let request = axios.get(s, {
       headers: {
         'Access-Control-Allow-Origin': '*',
-        "dasdadad" : "bye"
+        "dasdadad": "bye"
       }
     }).then(response => {
       responseX.data = response.data;
@@ -141,6 +171,31 @@ export class NasaMarsApiWrapper {
     //   console.log("ERR");
     // });
     return request;
+  }
+
+  static requestPromise(url, query) {
+    console.log("REQUEST ");
+    // query.api_key = Statics.api_key;
+    let s = NasaMarsApiWrapper.parseUrlQuery(url, query);
+    console.log(s);
+    return axios.get(s, {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
+  static requestPromiseWrapperResponse(url, query, data, wrappingFunction) {
+    NasaMarsApiWrapper.requestPromise(url, query).then(
+      response => {
+        console.log("RESPONSE DATA");
+        console.log(response.data);
+        data.data = wrappingFunction(response.data);
+      },
+      error => {
+        console.log("REQUEST" + url + " " + query);
+      }
+    )
   }
 
 
@@ -195,41 +250,38 @@ export class PhotoRequest {
    * @param {Object} object
    */
   constructor(object) {
-    if (object !== undefined) {
-      this.rover = object.rover || null;
-      this.query = {};
-      this.query.camera = object.camera || null;
-      this.query.sol = Integer.integerOrNull(new Integer(object.sol));
-      this.query.page = Integer.integerOrNull(new Integer(object.page));
-      if( object.earth_date !== undefined){
-        this.query.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
-      } else {
-        this.query.earth_date = null;
-      }
 
+    this.camera = object.camera || null;
+    this.sol = Integer.integerOrNull(new Integer(object.sol));
+    this.page = Integer.integerOrNull(new Integer(object.page));
+    if (object.earth_date !== undefined) {
+      this.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+    } else {
+      this.earth_date = null;
     }
   }
+
 
   static builder() {
     return new PhotoRequestBuilder();
   }
 
   static validDateOrNull(date) {
-    if( date  ){
+    if (date) {
       return null;
     }
-  /*  if (date instanceof Date) {
-      let day = date.getDay();
-      let month = date.getMonth();
-      let year = date.getFullYear();
+    /*  if (date instanceof Date) {
+        let day = date.getDay();
+        let month = date.getMonth();
+        let year = date.getFullYear();
 
-      let newdate = new Date();
-      date.setFullYear(year, month, day);
-      // month - 1 since the month index is 0-based (0 = January)
-      return (date.getFullYear() === year) && (date.getMonth() === month) && (date.getDate() === day);
-    } else {
-      return null;
-    }*/
+        let newdate = new Date();
+        date.setFullYear(year, month, day);
+        // month - 1 since the month index is 0-based (0 = January)
+        return (date.getFullYear() === year) && (date.getMonth() === month) && (date.getDate() === day);
+      } else {
+        return null;
+      }*/
 
   }
 }
@@ -295,16 +347,16 @@ export class Integer {
     return integer instanceof Integer ? integer : null;
   }
 
+  static isInteger(number) {
+    return number instanceof Integer;
+  }
+
   valueOf() {
     return this.getNumber();
   }
 
   getNumber() {
     return this.number;
-  }
-
-  static isInteger(number) {
-    return number instanceof Integer;
   }
 }
 
@@ -386,13 +438,16 @@ export class Rover {
 export class PhotoManifest {
   constructor(obj) {
     obj && Object.assign(this, obj);
-    Object.assign(this.photos,obj.photos.map(new SolDetails(x) ).reduce((x,y) => {
-      let map = x;
-      x.set(y.getSol(),y);
-      return map
-    }, new Map()));
+    Object.assign(this.photos, obj.photos.map(x => new PhotosDetails(x)));
+    // Object.assign(this.photos,obj.photos.map(new PhotosDetails(x) ).reduce((x,y) => {
+    //   let map = x;
+    //   x.set(y.getSol(),y);
+    //   return map
+    // }, new Map()));
 
+    console.log("PhotoManifest  created")
   }
+
   get getId() {
     return this.id;
   }
@@ -420,45 +475,38 @@ export class PhotoManifest {
   get getMaxDate() {
     return this.max_date;
   }
-  get getTotalPhotos(){
+
+  get getTotalPhotos() {
     return this.total_photos;
   }
-  get Photos(){
+
+  get getPhotosDetails() {
     return this.photos
   }
 
 }
 
-export class SolDetails{
-  constructor (object){
-      obj && Object.assign(this, obj);
+export class PhotosDetails {
+  constructor(obj) {
+    obj && Object.assign(this, obj);
   }
-  getSol(){
+
+  getSol() {
     return this.sol;
   }
-  getTotalPhotos(){
+
+  getTotalPhotos() {
     return this.total_photos;
   }
-  getCameras(){
+
+  getCameras() {
     return this.cameras;
-  }
-  getX(){
-
-  }
-}
-
-export class ApiRequestValues {
-  constructor() {
   }
 }
 
 export const Statics = {
-  // api_key: 'd4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi',
-
   rovers: {curiosity: "curiosity", opportunity: "opportunity", spirit: "spirit"},
-  // URI: "https://api.nasa.gov/mars-photos/api/v1/",
   // URI: "./api/v1/nasa/",
-  // URI: "http://localhost:8081/api/v1/nasa/",
   URI: "http://localhost:8080/api/v1/nasa/",
   endpoints: {
     rovers: "rovers/",
@@ -505,8 +553,8 @@ export class InvalidRequestException {
   }
 }
 
-export class CuriosityRequester{
-  constructor(){
+export class CuriosityRequester {
+  constructor() {
     this.data = NasaMarsApiWrapper.getCuriosityManifest();
     console.log(this.data);
   }

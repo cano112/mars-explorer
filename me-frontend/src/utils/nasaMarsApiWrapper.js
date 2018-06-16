@@ -3,26 +3,18 @@ import axios from 'axios';
 /**
  * Simple class that allows us to view photos by its properties
  *  API https://api.nasa.gov/api.html#Images examples:
- * - QUERY https://images-api.nasa.gov/search?q=curiosity%20photos
+ * - QUERY https://images-api.nasa.gov/search?q=curiosity/photos
  * - MANIFEST FROM ROVER CURIOSITY
- *      https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ *      https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/
  * - ROVERS
- *      https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/
  * - PHOTOS for sol = 0
- *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=0
  */
 
 
 export class NasaMarsApiWrapper {
 
-  /**
-   * Conctructor
-   * @param string key
-   */
-  constructor() {
-    this.rovers = null;
-    this._build();
-  }
 
   static getRovers(dataBind) {
     // const uri = Statics.URI + Statics.endpoints.rovers + "?api_key=" + Statics.api_key;
@@ -39,7 +31,8 @@ export class NasaMarsApiWrapper {
       console.log(response.data.rovers.map(x => new Rover(x)));
       dataBind.rovers = response.data.rovers.map(x => new Rover(x));
     }, err => {
-      console.log("ERR");
+      console.log(new RequestError(arguments.callee.name, error));
+
     })
   }
 
@@ -50,6 +43,11 @@ export class NasaMarsApiWrapper {
   }
 
 
+  /**
+   * Make request for manifest of specified rover and saves it to responseTo.data
+   * @param {Object } responseTo - to this object method will add data property
+   * @param {String} rover - name of rover
+   */
   static getManifestByRover(responseTo, rover) {
 
     let roverName = rover.toLowerCase();
@@ -61,30 +59,13 @@ export class NasaMarsApiWrapper {
     }
   }
 
-  static getCuriosityManifest(response) {
-    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.curiosity, {}, response, NasaMarsApiWrapper.getManifest);
-  }
-
-  static getOpportunityManifest(response) {
-    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.opportunity, {}, response, NasaMarsApiWrapper.getManifest);
-  }
-
-  static getSpiritManifest(response) {
-    return NasaMarsApiWrapper.requestPromiseWrapperResponse(Statics.URI + Statics.endpoints.manifest.spirit, {}, response, NasaMarsApiWrapper.getManifest);
-  }
-
-
   static parseUrlQuery(url, query) {
-    //TODO change
-    const uri = url;
-    return uri + "?" + Object.entries(query).map(x => x.map(encodeURIComponent).join("=")).join("&")
-  }
-
-  static testRequestPhotosCuriositySol2() {
-    let tmp = PhotoRequest.builder().setPage(0).setRover(Statics.rovers.curiosity).build();
-    console.log("Log" + tmp);
-    tmp = NasaMarsApiWrapper.requestPhotos(tmp);
-    return tmp;
+    return [url, Object.entries(query).map(x => x.map(encodeURIComponent).join("=")).join("&")].reduce((x, y) => {
+      if (y.length) {
+        return x + "?" + y;
+      }
+      return x;
+    });
   }
 
   /**
@@ -134,44 +115,10 @@ export class NasaMarsApiWrapper {
     }
     //ALL IS GOOD
     console.log("requestPhotos" + " fine");
-    return NasaMarsApiWrapper.request(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
+    return NasaMarsApiWrapper.requestPromise(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
 
   }
 
-  static request(url, query, responseX) {
-    console.log("REQUEST ");
-    // query.api_key = Statics.api_key;
-    let s = NasaMarsApiWrapper.parseUrlQuery(url, query);
-    console.log(s);
-    let request = axios.get(s, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        "dasdadad": "bye"
-      }
-    }).then(response => {
-      responseX.data = response.data;
-      console.log("RESPONSE:: ");
-      console.log(responseX);
-      return responseX;
-    }, err => {
-      console.log("ERR");
-    });
-
-
-    // axios.get(NasaMarsApiWrapper.parseUrlQuery(url, query), {
-    //   headers: {
-    //     'Access-Control-Allow-Origin': '*',
-    //     "dasdadad" : "bye"
-    //   },
-    //   crossdomain: true
-    // }).then(response => {
-    //   console.log("RESPONSE:: " + response.data);
-    //   dataBind = response.data;
-    // }, err => {
-    //   console.log("ERR");
-    // });
-    return request;
-  }
 
   static requestPromise(url, query) {
     console.log("REQUEST ");
@@ -193,31 +140,11 @@ export class NasaMarsApiWrapper {
         data.data = wrappingFunction(response.data);
       },
       error => {
-        console.log("REQUEST" + url + " " + query);
+        console.log(new RequestError(arguments.callee.name, error))
       }
     )
   }
-
-
-  /**
-   * Builds data structures etc rovers using data from manifest
-   * @private
-   */
-  _build() {
-    NasaMarsApiWrapper.getRovers(this.rovers)
-  }
-
-  /**
-   * Convert sol for data for selected rover
-   * @param {RoverName} rover
-   * @param {Number} sol
-   */
-  getDataBySol(rover, sol) {
-
-  }
-
 }
-
 
 export class PhotoPageRequester {
   /**
@@ -225,24 +152,80 @@ export class PhotoPageRequester {
    * @param {PhotoRequest} requestObject
    */
   constructor(requestObject) {
-    requestObject.query.page = requestObject.query.page || 0;
+    this.observers = [];
     this.requestObject = requestObject;
+    this.requestObject.query.page = this.requestObject.query.page || 0;
   }
 
   requestPage() {
-    return NasaMarsApiWrapper.requestPhotos(this.requestObject);
+    NasaMarsApiWrapper.requestPhotos(this.requestObject).then(response => {
+      const tmp = new PhotoPage(response.data);
+      this.observers.forEach(x => {
+        x(tmp);
+      })
+    }, error => {
+      console.log(new RequestError(arguments.callee.name, error))
+    });
+
+
   }
 
   requestNextPage() {
-    this.requestObject.page += 1;
-    return this.requestPage();
+    this.requestObject.query.page.number += 1;
+    this.requestPage();
+  }
+}
+
+export class Photo {
+  /**
+   *
+   * @param {Object} responseObject
+   */
+  constructor(responseObject) {
+    Object.assign(this, responseObject);
+    Object.assign(this.camera, new Camera(this.camera));
+    Object.assign(this.rover, new Camera(this.rover));
+  }
+
+  get getId() {
+    return this.id;
+  }
+
+  get getSol() {
+    return this.sol;
+  }
+
+  get getEarthDate() {
+    return this.earth_date;
+  }
+
+  get getCamera() {
+    return this.camera;
+  }
+
+  get getImgSrc() {
+    return this.img_src;
+  }
+
+  get getRover() {
+    return this.rover;
+  }
+
+}
+
+export class PhotoPage {
+  constructor(obj) {
+    this.photos = obj.photos.map(x => new Photo(x));
+  }
+
+  get getPhotos() {
+    return this.photos;
   }
 }
 
 
 /**
- * PhotoRequest class represents a object passed to NasaMarsApiWrapper.request
- *
+ * PhotoRequest class represents a Photos request
  */
 export class PhotoRequest {
   /**
@@ -250,18 +233,24 @@ export class PhotoRequest {
    * @param {Object} object
    */
   constructor(object) {
+    if (object !== undefined) {
+      this.rover = object.rover || null;
+      this.query = {};
+      this.query.camera = object.camera || null;
+      this.query.sol = Integer.integerOrNull(new Integer(object.sol));
+      this.query.page = Integer.integerOrNull(new Integer(object.page));
+      if (object.earth_date !== undefined) {
+        this.query.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+      } else {
+        this.query.earth_date = null;
+      }
 
-    this.camera = object.camera || null;
-    this.sol = Integer.integerOrNull(new Integer(object.sol));
-    this.page = Integer.integerOrNull(new Integer(object.page));
-    if (object.earth_date !== undefined) {
-      this.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
-    } else {
-      this.earth_date = null;
     }
   }
 
-
+  /**
+   * @return {PhotoRequestBuilder} -- builder object for PhotoRequest
+   */
   static builder() {
     return new PhotoRequestBuilder();
   }
@@ -363,7 +352,8 @@ export class Integer {
 
 export class Camera {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
   }
 
   get getName() {
@@ -384,14 +374,11 @@ export class Rover {
    * @param {Object} obj - Wrapping response object
    */
   constructor(obj) {
-    obj && Object.assign(this, obj);
-    Object.assign(this.cameras, obj.cameras.map(x => new Camera(x)));
+    /*obj && */
+    Object.assign(this, obj);
+    Object.assign(this.cameras, this.cameras.map(x => new Camera(x)));
   }
 
-  /**
-   *
-   * @returns {number} rover id
-   */
   get getId() {
     return this.id;
   }
@@ -437,13 +424,10 @@ export class Rover {
 
 export class PhotoManifest {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
     Object.assign(this.photos, obj.photos.map(x => new PhotosDetails(x)));
-    // Object.assign(this.photos,obj.photos.map(new PhotosDetails(x) ).reduce((x,y) => {
-    //   let map = x;
-    //   x.set(y.getSol(),y);
-    //   return map
-    // }, new Map()));
+
 
     console.log("PhotoManifest  created")
   }
@@ -488,7 +472,9 @@ export class PhotoManifest {
 
 export class PhotosDetails {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
+    Object.assign(this.cameras, this.cameras.map(x => new Camera(x)));
   }
 
   getSol() {
@@ -534,18 +520,25 @@ export class Utils {
   }
 }
 
-/**
- * Request for NasaMarsApiWrapper.request()
- */
 
+export class RequestError {
 
-/**
- * Request error
- */
+  /**
+   * Error while waiting for response
+   *
+   * @param {Object} error -- error object
+   * @param {*}argumentsX --other information for example name of method
+   */
+  constructor(error, argumentsX) {
+    this.in = argumentsX;
+    this.error = error;
+  }
+}
+
 export class InvalidRequestException {
   /**
    *
-   * @param {String} reason
+   * @param {String|Object} reason
    */
   constructor(reason) {
     this.reason = reason;
@@ -553,10 +546,19 @@ export class InvalidRequestException {
   }
 }
 
-export class CuriosityRequester {
-  constructor() {
-    this.data = NasaMarsApiWrapper.getCuriosityManifest();
-    console.log(this.data);
+export class Test {
+  static testRequestPhotosCuriositySol2() {
+    let tmp = PhotoRequest.builder().setPage(0).setRover(Statics.rovers.curiosity).build();
+    console.log("Log" + tmp);
+    tmp = NasaMarsApiWrapper.requestPhotos(tmp);
+    return tmp;
   }
 
+  static testRequestCuriosityPage1Sol1() {
+    let f = (obj) => console.log(obj);
+    let u = PhotoRequest.builder().setPage(1).setSol(0).setRover(Statics.rovers.curiosity).build();
+    let r = new PhotoPageRequester(u);
+    r.observers.push(f);
+    r.requestPage();
+  }
 }

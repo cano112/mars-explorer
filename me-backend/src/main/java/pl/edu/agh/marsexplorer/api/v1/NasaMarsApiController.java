@@ -2,10 +2,7 @@ package pl.edu.agh.marsexplorer.api.v1;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.marsexplorer.service.ProxyService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +18,7 @@ public class NasaMarsApiController {
         this.proxyService = proxyService;
     }
 
+    @CrossOrigin //DEV TIME
     @RequestMapping("/nasa/**")
     @ResponseBody
     public String proxyRequest(@RequestBody(required = false) String requestBody,

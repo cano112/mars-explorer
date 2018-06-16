@@ -8,5 +8,5 @@ docker/data
 *.iml
 me-backend/src/main/resources/public/
 me-frontend/node/
-
+*.sh
 

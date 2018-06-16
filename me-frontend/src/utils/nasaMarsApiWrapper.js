@@ -3,13 +3,13 @@ import axios from 'axios';
 /**
  * Simple class that allows us to view photos by its properties
  *  API https://api.nasa.gov/api.html#Images examples:
- * - QUERY https://images-api.nasa.gov/search?q=curiosity%20photos
+ * - QUERY https://images-api.nasa.gov/search?q=curiosity/photos
  * - MANIFEST FROM ROVER CURIOSITY
- *      https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ *      https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/
  * - ROVERS
- *      https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/
  * - PHOTOS for sol = 0
- *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
+ *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=0
  */
 
 
@@ -50,6 +50,11 @@ export class NasaMarsApiWrapper {
   }
 
 
+  /**
+   *
+   * @param responseTo
+   * @param rover
+   */
   static getManifestByRover(responseTo, rover) {
 
     let roverName = rover.toLowerCase();
@@ -85,6 +90,14 @@ export class NasaMarsApiWrapper {
     console.log("Log" + tmp);
     tmp = NasaMarsApiWrapper.requestPhotos(tmp);
     return tmp;
+  }
+
+  static testRequestCuriosityPage1Sol1(){
+    let f = (obj) => console.log(obj);
+    let u = PhotoRequest.builder().setPage(1).setSol(0).setRover(Statics.rovers.curiosity).build();
+    let r = new PhotoPageRequester(u);
+    r.observers.push(f);
+    r.requestPage();
   }
 
   /**
@@ -126,6 +139,11 @@ export class NasaMarsApiWrapper {
 
     if (requestObject.query.page !== null) {
       if (Integer.isInteger(requestObject.query.page) && requestObject.query.page >= 0) {
+        console.log(requestObject.query.page );
+        console.log(Integer.isInteger(requestObject.query.page) );
+        console.log(requestObject.query.page >= 0);
+
+
         request.page = requestObject.query.page.getNumber()
       } else {
         throw new InvalidRequestException("Invalid page number");
@@ -134,7 +152,7 @@ export class NasaMarsApiWrapper {
     }
     //ALL IS GOOD
     console.log("requestPhotos" + " fine");
-    return NasaMarsApiWrapper.request(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
+    return NasaMarsApiWrapper.requestPromise(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
 
   }
 
@@ -225,17 +243,75 @@ export class PhotoPageRequester {
    * @param {PhotoRequest} requestObject
    */
   constructor(requestObject) {
-    requestObject.query.page = requestObject.query.page || 0;
+    this.observers = [];
     this.requestObject = requestObject;
+    this.requestObject.query.page = this.requestObject.query.page || 0;
   }
 
+
   requestPage() {
-    return NasaMarsApiWrapper.requestPhotos(this.requestObject);
+
+    // return NasaMarsApiWrapper.requestPhotos(this.requestObject);
+    NasaMarsApiWrapper.requestPhotos(this.requestObject).then(response => {
+      let tmp = new PhotoPage(response.data);
+      this.observers.forEach(x => {
+        x(tmp);
+      })
+    },error => {});
+
+
   }
 
   requestNextPage() {
-    this.requestObject.page += 1;
-    return this.requestPage();
+    this.requestObject.query.page.number += 1;
+    this.requestPage();
+  }
+}
+
+export class Photo {
+  /**
+   *
+   * @param {Object} responseObject
+   */
+  constructor(responseObject) {
+    Object.assign(this, responseObject);
+    Object.assign(this.camera, new Camera(this.camera));
+    Object.assign(this.rover, new Camera(this.rover));
+  }
+
+  get getId() {
+    return this.id;
+  }
+
+  get getSol() {
+    return this.sol;
+  }
+
+  get getEarthdate() {
+    return this.earth_date;
+  }
+
+  get getCamera() {
+    return this.camera;
+  }
+
+  get getImgSrc() {
+    return this.img_src;
+  }
+
+  get getRover() {
+    return this.rover;
+  }
+
+}
+
+export class PhotoPage {
+  constructor(obj) {
+    this.photos = obj.photos.map(x => new Photo(x));
+  }
+
+  get getPhotos() {
+    return this.photos;
   }
 }
 
@@ -249,15 +325,31 @@ export class PhotoRequest {
    * Wrapping js object to unified request format
    * @param {Object} object
    */
+  // constructor(object) {
+  //
+  //   this.camera = object.camera || null;
+  //   this.sol = Integer.integerOrNull(new Integer(object.sol));
+  //   this.page = Integer.integerOrNull(new Integer(object.page));
+  //   if (object.earth_date !== undefined) {
+  //     this.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+  //   } else {
+  //     this.earth_date = null;
+  //   }
+  // }
+  //
   constructor(object) {
+    if (object !== undefined) {
+      this.rover = object.rover || null;
+      this.query = {};
+      this.query.camera = object.camera || null;
+      this.query.sol = Integer.integerOrNull(new Integer(object.sol));
+      this.query.page = Integer.integerOrNull(new Integer(object.page));
+      if (object.earth_date !== undefined) {
+        this.query.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+      } else {
+        this.query.earth_date = null;
+      }
 
-    this.camera = object.camera || null;
-    this.sol = Integer.integerOrNull(new Integer(object.sol));
-    this.page = Integer.integerOrNull(new Integer(object.page));
-    if (object.earth_date !== undefined) {
-      this.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
-    } else {
-      this.earth_date = null;
     }
   }
 
@@ -363,7 +455,8 @@ export class Integer {
 
 export class Camera {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
   }
 
   get getName() {
@@ -384,8 +477,9 @@ export class Rover {
    * @param {Object} obj - Wrapping response object
    */
   constructor(obj) {
-    obj && Object.assign(this, obj);
-    Object.assign(this.cameras, obj.cameras.map(x => new Camera(x)));
+    /*obj && */
+    Object.assign(this, obj);
+    Object.assign(this.cameras, this.cameras.map(x => new Camera(x)));
   }
 
   /**
@@ -437,7 +531,8 @@ export class Rover {
 
 export class PhotoManifest {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
     Object.assign(this.photos, obj.photos.map(x => new PhotosDetails(x)));
     // Object.assign(this.photos,obj.photos.map(new PhotosDetails(x) ).reduce((x,y) => {
     //   let map = x;
@@ -488,7 +583,9 @@ export class PhotoManifest {
 
 export class PhotosDetails {
   constructor(obj) {
-    obj && Object.assign(this, obj);
+    /*obj && */
+    Object.assign(this, obj);
+    Object.assign(this.cameras, this.cameras.map(x => new Camera(x)));
   }
 
   getSol() {

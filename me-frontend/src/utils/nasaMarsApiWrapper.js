@@ -22,7 +22,8 @@ export class NasaMarsApiWrapper {
   }
 
   static getRovers(dataBind) {
-    const uri = Statics.URI + Statics.endpoints.rovers + "?api_key=" + Statics.api_key;
+    // const uri = Statics.URI + Statics.endpoints.rovers + "?api_key=" + Statics.api_key;
+    const uri = Statics.URI + Statics.endpoints.rovers;
     console.log(uri);
     console.log("URI IS :: " + uri);
     axios.get(uri, {
@@ -39,8 +40,8 @@ export class NasaMarsApiWrapper {
     })
   }
 
-  static getCuriosityManifest() {
-      return NasaMarsApiWrapper.request(Statics.URI + Statics.endpoints.manifest.curiosity,{});
+  static getCuriosityManifest(response) {
+      return NasaMarsApiWrapper.request(Statics.URI + Statics.endpoints.manifest.curiosity,{},response);
   }
 
   static parseUrlQuery(url, query) {
@@ -107,25 +108,24 @@ export class NasaMarsApiWrapper {
 
   }
 
-  static request(url, query) {
+  static request(url, query,responseX) {
     console.log("REQUEST ");
-    let dataBind;
-
-    query.api_key = Statics.api_key;
+    // query.api_key = Statics.api_key;
     let s = NasaMarsApiWrapper.parseUrlQuery(url, query);
     console.log(s);
-    axios.get(s, {
+    let request = axios.get(s, {
       headers: {
         'Access-Control-Allow-Origin': '*',
         "dasdadad" : "bye"
       }
     }).then(response => {
+      responseX.data = response.data;
       console.log("RESPONSE:: ");
-      console.log(response.data.rovers.map(x => new Rover(x)));
-      dataBind.rovers = response.data.rovers.map(x => new Rover(x));
+      console.log(responseX);
+      return responseX;
     }, err => {
       console.log("ERR");
-    })
+    });
 
 
     // axios.get(NasaMarsApiWrapper.parseUrlQuery(url, query), {
@@ -140,7 +140,7 @@ export class NasaMarsApiWrapper {
     // }, err => {
     //   console.log("ERR");
     // });
-    return dataBind;
+    return request;
   }
 
 
@@ -164,7 +164,7 @@ export class NasaMarsApiWrapper {
 }
 
 
-class PhotoPageRequester {
+export class PhotoPageRequester {
   /**
    *
    * @param {PhotoRequest} requestObject
@@ -232,8 +232,6 @@ export class PhotoRequest {
     }*/
 
   }
-
-
 }
 
 
@@ -444,6 +442,9 @@ export class SolDetails{
   getCameras(){
     return this.cameras;
   }
+  getX(){
+
+  }
 }
 
 export class ApiRequestValues {
@@ -452,9 +453,13 @@ export class ApiRequestValues {
 }
 
 export const Statics = {
-  api_key: 'd4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi',
+  // api_key: 'd4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi',
+
   rovers: {curiosity: "curiosity", opportunity: "opportunity", spirit: "spirit"},
-  URI: "https://api.nasa.gov/mars-photos/api/v1/",
+  // URI: "https://api.nasa.gov/mars-photos/api/v1/",
+  // URI: "./api/v1/nasa/",
+  // URI: "http://localhost:8081/api/v1/nasa/",
+  URI: "http://localhost:8080/api/v1/nasa/",
   endpoints: {
     rovers: "rovers/",
     photos: {
@@ -507,12 +512,3 @@ export class CuriosityRequester{
   }
 
 }
-
-/**
- * Simple class that allows us to view photos by its properties
- *  API https://api.nasa.gov/api.html#Images examples:
- * - QUERY https://images-api.nasa.gov/search?q=curiosity%20photos
- * - MANIFEST FROM ROVER CURIOSITY https://api.nasa.gov/mars-photos/api/v1/manifests/curiosity/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
- * - ROVERS https://api.nasa.gov/mars-photos/api/v1/rovers/?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi
- * - PHOTOS for sol = 0 https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?api_key=d4AMs5679WgbHT8C38EoYbCI8ssPsWEdGDRzVgEi&sol=0
- */

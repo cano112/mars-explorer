@@ -1,6 +1,92 @@
 <template>
-  <div>
-    <h1></h1>
+  <div id="rover-template">
+    <h1>Prop value is {{roverName}}</h1>
+    <div>
+      <b-carousel id="carousel1"
+                  data-wrap = false
+                  style="text-shadow: 1px 1px 2px #333;"
+                  controls
+                  label-prev="dad"
+                  label-next="dasd"
+                  label-goto-slide="dsda"
+                  background="#ababab"
+                  img-width="1024"
+                  img-height="480"
+                  v-model="slide"
+                  @sliding-start="onSlideStart"
+                  @sliding-end="onSlideEnd"
+      >
+        <!-- Text slides with image -->
+        <b-carousel-slide caption="First slide"
+                          text="Nulla vitae elit libero, a pharetra augue mollis interdum."
+                          img-src="https://picsum.photos/1024/480/?image=52"></b-carousel-slide>
+
+        <b-carousel-slide caption="First222 slide"
+                          text="Nulla vitae elit libero, a pharetra augue mollis interdum."
+                          img-src="https://picsum.photos/1024/480/?image=52"></b-carousel-slide>
+
+
+
+  <!--      &lt;!&ndash; Slides with custom text &ndash;&gt;
+        <b-carousel-slide img-src="https://picsum.photos/1024/480/?image=54">
+          <h1>Hello world!</h1>
+        </b-carousel-slide>
+
+        &lt;!&ndash; Slides with image only &ndash;&gt;
+        <b-carousel-slide img-src="https://picsum.photos/1024/480/?image=58">
+        </b-carousel-slide>
+
+        &lt;!&ndash; Slides with img slot &ndash;&gt;
+        &lt;!&ndash; Note the classes .d-block and .img-fluid to prevent browser default image alignment &ndash;&gt;
+        <b-carousel-slide>
+          <img slot="img" class="d-block img-fluid w-100" width="1024" height="480"
+               src="https://picsum.photos/1024/480/?image=55" alt="image slot">
+        </b-carousel-slide>
+
+        &lt;!&ndash; Slide with blank fluid image to maintain slide aspect ratio &ndash;&gt;
+        <b-carousel-slide caption="Blank Image" img-blank img-alt="Blank image">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+            eros felis, tincidunt a tincidunt eget, convallis vel est. Ut pellentesque
+            ut lacus vel interdum.
+          </p>
+        </b-carousel-slide>-->
+
+      </b-carousel>
+
+      <p class="mt-4">
+        Slide #: {{ slide }}<br>
+        Sliding: {{ sliding }}
+      </p>
+    </div>
   </div>
 </template>
+<script>
+  export default {
+    name: 'rover-template',
+    props: ['roverName'],
+    data (){
+      return {
+        slide :0,
+        sliding: null,
+        images: [],
+        isCycling: false,
+      }
+    },
 
+    methods: {
+      onSlideStart (slide) {
+        console.log(slide);
+        this.sliding = true
+      },
+      onSlideEnd (slide) {
+        this.sliding = false
+      }
+    },
+    computed () {
+      return {
+        isCycling:false,
+      }
+    }
+  }
+</script>

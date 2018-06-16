@@ -1,10 +1,10 @@
 <template>
-  <div id="photo_browser"  >
+  <div id="photo-browser"  >
     <b-tabs pills card >
-      <b-tab  :title="`Tab ${rover.getName}`" v-for="rover in rovers" :key="rover.getId" >
+      <b-tab  :title="`${rover.getName}`" v-for="rover in rovers" :key="rover.getId" >
           <b-card :title="`${rover.getName}`" bg-variant="light" >
             <div>
-              <rover-template roverName="`${rover.getName}`"><h2>Image Slider Place Holder</h2></rover-template>
+              <rover-template :roverName="`${rover.getName}`"><!--<h2>Image Slider Place Holder</h2>--></rover-template>
             </div>
             <b-list-group>
               <b-list-group-item> Landing date: <span class="font-weight-bold">{{rover.getLandingDate}}</span></b-list-group-item>
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+
   import { PhotoManifest,Statics, Camera, NasaMarsApiWrapper }  from "../utils/nasaMarsApiWrapper"
   import RoverTemplate from './RoverTemplate.vue';
 
@@ -50,7 +51,10 @@
     },
     methods: {
       refresh(){}
-    }
+    },
+    components:{
+      'rover-template': RoverTemplate
+    },
   }
 
 

@@ -17,14 +17,13 @@
                   '
                   indicators
                   @sliding-start="onSlideStart"
+
                   @sliding-end="onSlideEnd">
         <b-carousel-slide v-for="image in images" :key="image.id"
                           :caption="`1Images placeholder slideNumber=${slide} key= ${image.id}`"
                           :text="`Nulla vitae elit libero, a pharetra augue mollis interdum. ${image.getImgSrc}`"
                           :img-src="`${image.getImgSrc}`"
                           comment=' img-src="https://picsum.photos/1024/480/?image=52"'></b-carousel-slide>
-
-
       </b-carousel>
     </div>
     <div>
@@ -34,6 +33,7 @@
 </template>
 <script>
   import {
+
     Statics,
     NasaMarsApiWrapper,
     PhotoRequest,
@@ -84,7 +84,6 @@
       nextPage() {
         this.$data.requester.requestNextPage();
       }
-
     },
     //WARNING NEVER USE value :() => {} it cause this returning {a:VueObject}}
     // https://vuejs.org/v2/api/#watch
@@ -92,6 +91,7 @@
       slide(newV, oldV) {
         console.log(this);
         if (newV > oldV && (this.$data.slide + 1) >= this.$data.images.length) {
+
           this.nextPage();
         }
       },

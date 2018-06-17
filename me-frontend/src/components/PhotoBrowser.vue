@@ -4,7 +4,7 @@
       <b-tab  :title="`${rover.getName}`" v-for="rover in rovers" :key="rover.getId" >
           <b-card :title="`${rover.getName}`" bg-variant="light" >
             <div>
-              <rover-template :roverName="`${rover.getName}`"><!--<h2>Image Slider Place Holder</h2>--></rover-template>
+              <rover-template :roverName="`${rover.getName}`"></rover-template>
             </div>
             <b-list-group>
               <b-list-group-item> Landing date: <span class="font-weight-bold">{{rover.getLandingDate}}</span></b-list-group-item>

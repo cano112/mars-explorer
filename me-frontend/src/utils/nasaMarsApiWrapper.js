@@ -12,10 +12,7 @@ import axios from 'axios';
  *      https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=0
  */
 
-
 export class NasaMarsApiWrapper {
-
-
   static getRovers(dataBind) {
     // const uri = Statics.URI + Statics.endpoints.rovers + "?api_key=" + Statics.api_key;
     const uri = Statics.URI + Statics.endpoints.rovers;
@@ -44,6 +41,7 @@ export class NasaMarsApiWrapper {
 
 
   /**
+
    * Make request for manifest of specified rover and saves it to responseTo.data
    * @param {Object } responseTo - to this object method will add data property
    * @param {String} rover - name of rover
@@ -68,11 +66,18 @@ export class NasaMarsApiWrapper {
     });
   }
 
+  static testRequestCuriosityPage1Sol1() {
+    let f = (obj) => console.log(obj);
+    let u = PhotoRequest.builder().setPage(1).setSol(0).setRover(Statics.rovers.curiosity).build();
+    let r = new PhotoPageRequester(u);
+    r.observers.push(f);
+    r.requestPage();
+  }
+
   /**
    * Request
    * @param {PhotoRequest} requestObject
    */
-
   static requestPhotos(requestObject) {
     let request = {};
     if (requestObject === undefined) {
@@ -107,18 +112,21 @@ export class NasaMarsApiWrapper {
 
     if (requestObject.query.page !== null) {
       if (Integer.isInteger(requestObject.query.page) && requestObject.query.page >= 0) {
+        console.log(requestObject.query.page);
+        console.log(Integer.isInteger(requestObject.query.page));
+        console.log(requestObject.query.page >= 0);
+
+
         request.page = requestObject.query.page.getNumber()
       } else {
         throw new InvalidRequestException("Invalid page number");
       }
-
     }
     //ALL IS GOOD
     console.log("requestPhotos" + " fine");
     return NasaMarsApiWrapper.requestPromise(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
 
   }
-
 
   static requestPromise(url, query) {
     console.log("REQUEST ");
@@ -145,6 +153,7 @@ export class NasaMarsApiWrapper {
     )
   }
 }
+
 
 export class PhotoPageRequester {
   /**
@@ -176,6 +185,7 @@ export class PhotoPageRequester {
   }
 }
 
+
 export class Photo {
   /**
    *
@@ -195,6 +205,7 @@ export class Photo {
     return this.sol;
   }
 
+
   get getEarthDate() {
     return this.earth_date;
   }
@@ -212,6 +223,7 @@ export class Photo {
   }
 
 }
+
 
 export class PhotoPage {
   constructor(obj) {
@@ -259,19 +271,6 @@ export class PhotoRequest {
     if (date) {
       return null;
     }
-    /*  if (date instanceof Date) {
-        let day = date.getDay();
-        let month = date.getMonth();
-        let year = date.getFullYear();
-
-        let newdate = new Date();
-        date.setFullYear(year, month, day);
-        // month - 1 since the month index is 0-based (0 = January)
-        return (date.getFullYear() === year) && (date.getMonth() === month) && (date.getDate() === day);
-      } else {
-        return null;
-      }*/
-
   }
 }
 
@@ -310,6 +309,7 @@ class PhotoRequestBuilder {
     return new PhotoRequest(this.object);
   }
 }
+
 
 export class Integer {
   constructor(number) {
@@ -366,6 +366,7 @@ export class Camera {
 
 }
 
+
 /**
  * Wrapper for response from https://api.nasa.gov/mars-photos/api/v1/rovers/
  */
@@ -418,10 +419,10 @@ export class Rover {
 
 }
 
+
 /**
  * Wrapper for PhotoManifest endpoint request
  */
-
 export class PhotoManifest {
   constructor(obj) {
     /*obj && */
@@ -470,6 +471,7 @@ export class PhotoManifest {
 
 }
 
+
 export class PhotosDetails {
   constructor(obj) {
     /*obj && */
@@ -488,7 +490,9 @@ export class PhotosDetails {
   getCameras() {
     return this.cameras;
   }
+
 }
+
 
 export const Statics = {
   rovers: {curiosity: "curiosity", opportunity: "opportunity", spirit: "spirit"},
@@ -509,23 +513,22 @@ export const Statics = {
   },
 };
 
+
 export class Utils {
   /**
-   *
    * @param {Date} date
    * @returns {string}
    */
   static dateToIsoDateString(date) {
     return date.toISOString().substring(0, 10);
   }
+
 }
 
 
 export class RequestError {
-
   /**
    * Error while waiting for response
-   *
    * @param {Object} error -- error object
    * @param {*}argumentsX --other information for example name of method
    */
@@ -533,7 +536,9 @@ export class RequestError {
     this.in = argumentsX;
     this.error = error;
   }
+
 }
+
 
 export class InvalidRequestException {
   /**
@@ -544,7 +549,9 @@ export class InvalidRequestException {
     this.reason = reason;
     this.name = "InvalidRequestException";
   }
+
 }
+
 
 export class Test {
   static testRequestPhotosCuriositySol2() {
@@ -561,4 +568,5 @@ export class Test {
     r.observers.push(f);
     r.requestPage();
   }
+
 }

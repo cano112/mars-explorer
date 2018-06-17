@@ -44,6 +44,7 @@ export class NasaMarsApiWrapper {
 
 
   /**
+
    * Make request for manifest of specified rover and saves it to responseTo.data
    * @param {Object } responseTo - to this object method will add data property
    * @param {String} rover - name of rover
@@ -68,11 +69,18 @@ export class NasaMarsApiWrapper {
     });
   }
 
+  static testRequestCuriosityPage1Sol1() {
+    let f = (obj) => console.log(obj);
+    let u = PhotoRequest.builder().setPage(1).setSol(0).setRover(Statics.rovers.curiosity).build();
+    let r = new PhotoPageRequester(u);
+    r.observers.push(f);
+    r.requestPage();
+  }
+
   /**
    * Request
    * @param {PhotoRequest} requestObject
    */
-
   static requestPhotos(requestObject) {
     let request = {};
     if (requestObject === undefined) {
@@ -107,6 +115,11 @@ export class NasaMarsApiWrapper {
 
     if (requestObject.query.page !== null) {
       if (Integer.isInteger(requestObject.query.page) && requestObject.query.page >= 0) {
+        console.log(requestObject.query.page);
+        console.log(Integer.isInteger(requestObject.query.page));
+        console.log(requestObject.query.page >= 0);
+
+
         request.page = requestObject.query.page.getNumber()
       } else {
         throw new InvalidRequestException("Invalid page number");
@@ -118,7 +131,6 @@ export class NasaMarsApiWrapper {
     return NasaMarsApiWrapper.requestPromise(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
 
   }
-
 
   static requestPromise(url, query) {
     console.log("REQUEST ");
@@ -195,7 +207,9 @@ export class Photo {
     return this.sol;
   }
 
+
   get getEarthDate() {
+
     return this.earth_date;
   }
 
@@ -232,6 +246,18 @@ export class PhotoRequest {
    * Wrapping js object to unified request format
    * @param {Object} object
    */
+  // constructor(object) {
+  //
+  //   this.camera = object.camera || null;
+  //   this.sol = Integer.integerOrNull(new Integer(object.sol));
+  //   this.page = Integer.integerOrNull(new Integer(object.page));
+  //   if (object.earth_date !== undefined) {
+  //     this.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+  //   } else {
+  //     this.earth_date = null;
+  //   }
+  // }
+  //
   constructor(object) {
     if (object !== undefined) {
       this.rover = object.rover || null;

@@ -1,6 +1,5 @@
 <template>
   <div id="rover-template">
-    <!--<h1>Prop value is {{roverName}}</h1>-->
     <div class="carouserImages">
       <b-carousel :id="`carousel${roverName}`"
                   data-wrap=false
@@ -11,11 +10,6 @@
                   img-height="200"
                   v-model="slide"
                   :interval="0"
-                  comment='
-                    keyboard=false
-                    cycling=false
-                    indicators
-                  '
                   @sliding-start="onSlideStart"
                   @sliding-end="onSlideEnd">
         <b-carousel-slide v-for="image in images"
@@ -31,7 +25,7 @@
                       alt="image slot"
                       offset="1000"
                       throttle="200"
-                      comment=' blank-src="http://mars.jpl.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/00014/opgs/edr/fcam/FRA_398741806EDR_F0030004FHAZ00200M_.JPG"'/>
+                      comment='blank-src="http://mars.jpl.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/00014/opgs/edr/fcam/FRA_398741806EDR_F0030004FHAZ00200M_.JPG"'></b-img-lazy>
         </b-carousel-slide>
       </b-carousel>
     </div>
@@ -133,9 +127,9 @@
           this.$data.images.push(...images.photos);
           window.dispatchEvent(new Event("scroll"));
         }
+
       },
       nextPage() {
-        // this.$data.requester.requestNextPage();
         this.$data.requester.requestPage();
       }
     },
@@ -150,6 +144,7 @@
         if (newV > oldV && (this.$data.slide + 2) >= this.$data.images.length) {
           this.nextPage();
         }
+
       },
       photoManifest: {
         handler(val) {

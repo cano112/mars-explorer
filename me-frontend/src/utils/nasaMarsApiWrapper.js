@@ -69,7 +69,6 @@ export class NasaMarsApiWrapper {
     });
   }
 
-
   /**
    * Request
    * @param {PhotoRequest} requestObject
@@ -298,6 +297,7 @@ export class Photo {
 
 
   get getEarthDate() {
+
     return this.earth_date;
   }
 

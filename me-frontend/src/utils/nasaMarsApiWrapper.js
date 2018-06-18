@@ -36,7 +36,10 @@ export class NasaMarsApiWrapper {
   static getManifest(x) {
     console.log("MANIFEST");
     console.log(x);
-    return new PhotoManifest(x.photo_manifest);
+    console.log("formated manifest");
+    let z = new PhotoManifest(x.photo_manifest);
+    console.log(z);
+    return z
   }
 
 
@@ -66,13 +69,6 @@ export class NasaMarsApiWrapper {
     });
   }
 
-  static testRequestCuriosityPage1Sol1() {
-    let f = (obj) => console.log(obj);
-    let u = PhotoRequest.builder().setPage(1).setSol(0).setRover(Statics.rovers.curiosity).build();
-    let r = new PhotoPageRequester(u);
-    r.observers.push(f);
-    r.requestPage();
-  }
 
   /**
    * Request
@@ -123,7 +119,7 @@ export class NasaMarsApiWrapper {
       }
     }
     //ALL IS GOOD
-    console.log("requestPhotos" + " fine");
+    console.log("requestPhotos fine");
     return NasaMarsApiWrapper.requestPromise(Statics.URI + Statics.endpoints.photos[requestObject.rover], request)
 
   }
@@ -159,30 +155,125 @@ export class PhotoPageRequester {
   /**
    *
    * @param {PhotoRequest} requestObject
+   * @param {PhotoManifest} filteredManifest we get getPhotosDetails from it as use as iterator
    */
-  constructor(requestObject) {
+  constructor(requestObject, filteredManifest) {
     this.observers = [];
     this.requestObject = requestObject;
-    this.requestObject.query.page = this.requestObject.query.page || 0;
+    this.photoDetails = filteredManifest.getPhotosDetails;
+    this.solIndex = 0;
+    this.setPageToZero();
+    this.requestObject.query.sol= new Integer(this.photoDetails[this.solIndex].sol);
+    console.log("getPhotosDetails");
+    console.log(this.photoDetails);
+  }
+
+  hasNextPhotoDetail(){
+    return  this.solIndex <= this.photoDetails.length;
+  }
+
+  /**
+   * Filtering the manifest basing on request query
+   * Doesn't filter page
+   * Doesn't support filtering by earth date u can use converter for rover to convert earth-date to sol
+   * Doesn't check if u pass correct data for the same rover
+   * @param {PhotoManifest} photoManifest -manifest for current rover
+   * @param {PhotoRequest} requestObject -request for current rover
+   * @return {PhotoManifest|Null} filteredManifest -returned value is filtered manifest object with altered PhotosDetails array
+   */
+  static queryManifestFilter(photoManifest, requestObject) {
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    console.log(photoManifest);
+    console.log(requestObject);
+    let photoManifestCopy = new PhotoManifest(photoManifest);
+    let tmp = photoManifest.photos.filter(x => this._queryManifestFilter(x, requestObject));
+    console.log(tmp);
+    photoManifestCopy.photos =tmp;
+    console.log(photoManifestCopy);
+    return photoManifestCopy;
+  }
+
+  /**
+   *
+   * @param {PhotosDetails} photosDetails -details filter
+   * @param {PhotoRequest} requestObject -request for current rover
+   * @return {Boolean} flag -does photosDetails satisfy filter from requestObject
+   * @private
+   */
+  static _queryManifestFilter(photosDetails, requestObject) {
+
+    if (requestObject.query.camera) {
+      if (photosDetails.getCameras().filter(x => x.name === requestObject.query.camera).length === 0) {
+        return false;
+      }
+    }
+    if (requestObject.query.sol) {
+      if (photosDetails.getSol() !== requestObject.query.sol) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  setPageToZero() {
+    this.requestObject.query.page = new Integer(1);
   }
 
   requestPage() {
     NasaMarsApiWrapper.requestPhotos(this.requestObject).then(response => {
       const tmp = new PhotoPage(response.data);
-      this.observers.forEach(x => {
-        x(tmp);
-      })
+      if(tmp.photos.length === 0){
+         this.nextSolAndGet();
+      }else {
+        this.requestObject.query.page.number += 1;
+        this.observers.forEach(x => {
+          x(tmp);
+        });
+      }
     }, error => {
       console.log(new RequestError(arguments.callee.name, error))
     });
-
-
   }
 
   requestNextPage() {
-    this.requestObject.query.page.number += 1;
+
+    // this.requestPage();
+  }
+
+
+  nextSolAndGet() {
+    if( !this.hasNextPhotoDetail()){
+      return false;
+    }
+    console.log("currentSol is ");
+    console.log(this.photoDetails[this.solIndex].sol);
+    console.log("nextSol is ");
+    this.solIndex += 1;
+    console.log(this.photoDetails[this.solIndex].sol);
+    this.requestObject.query.sol.number = this.photoDetails[this.solIndex].sol;
+    this.setPageToZero();
     this.requestPage();
   }
+
+  hasNextSol() {
+
+  }
+
+  /*
+    if (object !== undefined) {
+    this.rover = object.rover || null;
+    this.query = {};
+    this.query.camera = object.camera || null;
+    this.query.sol = Integer.integerOrNull(new Integer(object.sol));
+    this.query.page = Integer.integerOrNull(new Integer(object.page));
+    if (object.earth_date !== undefined) {
+    this.query.earth_date = PhotoRequest.validDateOrNull(new Date(object.earth_date || null));
+  } else {
+    this.query.earth_date = null;
+  }
+  */
+
+
 }
 
 
@@ -353,7 +444,11 @@ export class Integer {
 export class Camera {
   constructor(obj) {
     /*obj && */
-    Object.assign(this, obj);
+    if(typeof  obj  === "string"){
+      this.name = obj;
+    } else{
+      Object.assign(this, obj);
+    }
   }
 
   get getName() {
@@ -468,13 +563,11 @@ export class PhotoManifest {
   get getPhotosDetails() {
     return this.photos
   }
-
 }
 
 
 export class PhotosDetails {
   constructor(obj) {
-    /*obj && */
     Object.assign(this, obj);
     Object.assign(this.cameras, this.cameras.map(x => new Camera(x)));
   }
@@ -567,6 +660,18 @@ export class Test {
     let r = new PhotoPageRequester(u);
     r.observers.push(f);
     r.requestPage();
+  }
+
+  static testFilter() {
+    const req = PhotoRequest.builder().setRover(Statics.rovers.curiosity).setCamera("CHEMCAM").build();
+    let data = {
+      set data(x) {
+        console.log("was");
+        const z = PhotoPageRequester.this.$data.filteredManifestqueryManifestFilter(x, req);
+        console.log(z);
+      }
+    };
+    NasaMarsApiWrapper.getManifestByRover(data, Statics.rovers.curiosity);
   }
 
 }

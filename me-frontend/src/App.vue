@@ -18,11 +18,11 @@
   @import '../node_modules/bootstrap-vue/dist/bootstrap-vue.css';
   @import '../node_modules/bootstrap/scss/bootstrap.scss';
   #viewPort {
-    height: 100vh;
-    width: 100vw;
-    min-width: 100vw;
+    /*height: 100vh;*/
+    /*width: 100vw;*/
+    /*max-width: 100vw;*/
   }
   body {
-    width: 100vw;
+    /*width: 100vw;*/
   }
 </style>

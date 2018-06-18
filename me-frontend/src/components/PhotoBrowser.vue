@@ -2,7 +2,7 @@
   <div id="photo-browser"  >
     <b-tabs pills card >
       <b-tab  :title="`${rover.getName}`" v-for="rover in rovers" :key="rover.getId" >
-          <b-card :title="`${rover.getName}`" bg-variant="light" >
+         <!-- <b-card :title="`${rover.getName}`" bg-variant="light" >-->
             <div>
               <rover-template :roverName="`${rover.getName}`"></rover-template>
             </div>
@@ -40,9 +40,7 @@
     name: 'photo-browser',
     created(){
       console.log("hello init");
-      console.log(this.$data);
       NasaMarsApiWrapper.getRovers(this.$data);
-      console.log("end init");
     },
     data(){
       return{

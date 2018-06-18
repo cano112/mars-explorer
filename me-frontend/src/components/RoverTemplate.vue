@@ -24,7 +24,7 @@
                       :src="`${image.getImgSrc}`"
                       alt="image slot"
                       offset="1000"
-                      throttle="200"
+                      throttle="100"
                       comment='blank-src="http://mars.jpl.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/00014/opgs/edr/fcam/FRA_398741806EDR_F0030004FHAZ00200M_.JPG"'></b-img-lazy>
         </b-carousel-slide>
       </b-carousel>
@@ -44,9 +44,14 @@
         </b-pagination>
       </div>
       <p slot="text"
-         style="text-align: center"
-         v-if="images.length !== 0">
-        {{images[slide].img_src}} <br/>
+         style="text-align: center; color: #92a198;"
+         v-if="images.length !== 0" >
+
+        <a target="_blank"
+           :href="`${images[slide].img_src}`" > {{images[slide].img_src}}</a>
+
+
+        <br/>
         {{images[slide].rover.cameras.filter(x=> x.name ==images[slide].camera.name)[0].full_name}}
       </p>
     </div>
@@ -149,7 +154,7 @@
       photoManifest: {
         handler(val) {
           //TESTING SRT TO ALL KNOW CAMERA
-          this.$data.request = PhotoRequest.builder().setCamera("FHAZ").setRover(this.getRoverForTab()).build();
+          this.$data.request = PhotoRequest.builder().setCamera("NAVCAM").setRover(this.getRoverForTab()).build();
           this.$data.requester = new PhotoPageRequester(this.$data.request, val);
           console.log("#############################");
           console.log(val);

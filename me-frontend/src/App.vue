@@ -23,6 +23,8 @@
     /*max-width: 100vw;*/
   }
   body {
+    background-color: #070610;
+    text: white;
     /*width: 100vw;*/
   }
 </style>

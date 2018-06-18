@@ -590,7 +590,7 @@ export class PhotosDetails {
 export const Statics = {
   rovers: {curiosity: "curiosity", opportunity: "opportunity", spirit: "spirit"},
   // URI: "./api/v1/nasa/",
-  URI: "http://localhost:8080/api/v1/nasa/",
+  URI: "api/v1/nasa/",
   endpoints: {
     rovers: "rovers/",
     photos: {

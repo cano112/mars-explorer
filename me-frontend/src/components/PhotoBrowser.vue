@@ -1,7 +1,7 @@
 <template>
   <div id="photo-browser">
-    <b-tabs pills card>
-      <b-tab  title-item-class="danger" :title="`${rover.getName}`" v-for="rover in rovers" :key="rover.getId">
+    <b-tabs pills card class="justify-content-center" >
+      <b-tab  :title="`${rover.getName}`" v-for="rover in rovers" :key="rover.getId">
         <div>
           <rover-template :roverName="`${rover.getName}`"></rover-template>
         </div>
@@ -104,5 +104,15 @@
 </script>
 
 <style>
+
+.nav-pills .nav-link {
+
+    color: #b6c5ce;
+    background-color: #004656;
+    margin: 0px 4px;
+}
+.tabs > div > ul {
+justify-content: center !important;
+}
 
 </style>

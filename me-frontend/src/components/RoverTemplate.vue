@@ -72,7 +72,6 @@
     name: 'rover-template',
     props: ['roverName'],
     created() {
-      console.log("created rover tab with slider");
       this.init();
     },
     data() {
@@ -88,7 +87,7 @@
         requester: {},
         imageRequester: {},
         filteredManifest: {},
-        page:1,
+        page: 1,
       }
     },
 
@@ -105,13 +104,10 @@
         };
         NasaMarsApiWrapper.getManifestByRover(req, this.getRoverForTab());
       },
-      testClick(e){
-        console.log("clicked");
-        console.log(e);
-      },
       getRoverForTab() {
         return Statics.rovers[this.$props.roverName.toLowerCase()]
       },
+
       onSlideStart(slide) {
         window.dispatchEvent(new Event("scroll"));
         this.sliding = true;
@@ -119,9 +115,12 @@
         // window.dispatchEvent(new Event("scroll"));
         return false;
         this.nextSlide(slide + 1);
-      }, nextSlide(slide) {
+      },
+
+      nextSlide(slide) {
 
       },
+
       onSlideEnd(slide) {
         this.sliding = false;
         return false;
@@ -179,6 +178,7 @@
     }
   }
 </script>
+
 <style lang="scss">
   .carouserImages img {
     max-height: 600px;

@@ -6,7 +6,6 @@ export class UserService {
   static logout(onSuccess) {
     axios.post(LOGOUT_URL)
       .then(response => {
-        this._clearLocalStorageUserData()
         onSuccess()
       })
       .catch(error => {

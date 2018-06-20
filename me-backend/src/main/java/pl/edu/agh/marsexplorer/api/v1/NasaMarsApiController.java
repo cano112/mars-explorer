@@ -18,7 +18,7 @@ public class NasaMarsApiController {
         this.proxyService = proxyService;
     }
 
-    @CrossOrigin //DEV TIME
+    @CrossOrigin //TODO: make secure in prod
     @RequestMapping("/nasa/**")
     @ResponseBody
     public String proxyRequest(@RequestBody(required = false) String requestBody,

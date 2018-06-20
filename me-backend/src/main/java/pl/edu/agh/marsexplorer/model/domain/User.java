@@ -1,5 +1,6 @@
 package pl.edu.agh.marsexplorer.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -17,6 +18,7 @@ public class User {
 
     private String name;
 
+    @JsonIgnore
     private List<Photo> photos;
 
     public User() {}

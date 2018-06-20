@@ -20,12 +20,14 @@
 
       <!-- Right aligned nav items -->
       <b-navbar-nav class="ml-auto">
-        <b-nav-item-dropdown right>
+        <b-nav-item right :href="loginUrl" v-if="!this.$root.authenticated">Login</b-nav-item>
+        <b-nav-item-dropdown right v-if="this.$root.authenticated">
+          <!-- Using button-content slot -->
           <template slot="button-content">
-            <span>User</span>
+            {{this.$root.userName}}
           </template>
           <b-dropdown-item href="#">Profile</b-dropdown-item>
-          <b-dropdown-item href="#">Signout</b-dropdown-item>
+          <b-dropdown-item href="/" @click="logout()">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>
     </b-collapse>
@@ -34,19 +36,22 @@
 
 <script>
   import {CAMERAS} from "../../model/Rover";
+  import {LOGIN_URL} from "../../config/ApiConfig";
+  import {UserService} from "../../service/UserService";
 
   export default {
     name: 'nav-bar',
     props: ['rovers'],
     data() {
       return {
-        cameras: CAMERAS
+        cameras: CAMERAS,
+        loginUrl: LOGIN_URL,
       }
     },
     methods: {
-      updateCurrentRover: function (currentRover) {
-        this.$emit('rover-changed', currentRover);
-      }
+      logout() {
+        UserService.logout(() => {})
+      },
     }
   }
 </script>

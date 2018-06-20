@@ -9,6 +9,7 @@
   import NavBar from './NavBar';
   import PhotoBrowser from "../photo_browser/PhotoBrowser";
   import {ROVERS} from "../../model/Rover";
+  import {UserService} from "../../service/UserService";
 
   export default {
     name: 'app-template',
@@ -17,6 +18,20 @@
       return {
         rovers: ROVERS,
       }
+    },
+    created() {
+      UserService.getUserData(
+        response => {
+        this.$root.authenticated = true;
+        this.$root.userName = response.name;
+        this.$root.userId = response.id;
+        },
+        error => {
+          this.$root.authenticated = false;
+          this.$root.userName = '';
+          this.$root.userId = '';
+        }
+      );
     },
     methods: {
     },

@@ -6,7 +6,8 @@ import static pl.edu.agh.marsexplorer.model.domain.CameraType.*;
 
 public enum Rover {
     CURIOSITY("Curiosity", FHAZ, RHAZ, MAST, CHEMCAM, MAHLI, MARDI, NAVCAM),
-    OPPORTUNITY("Opportunity", FHAZ, RHAZ, NAVCAM, PANCAM, MINITES);
+    OPPORTUNITY("Opportunity", FHAZ, RHAZ, NAVCAM, PANCAM, MINITES),
+    SPIRIT("Spirit", FHAZ, RHAZ, NAVCAM, PANCAM, MINITES);
 
     private final String roverName;
     private final CameraType[] cameras;

@@ -27,26 +27,36 @@
     </div>
     <b-progress class="fixed-bottom" :value="currentPhotoIndex+1" :max="photos.length" variant="dark"></b-progress>
     <div class="photo-info-box">
-      <span>Rover: <span class="text-capitalize font-weight-bold">{{this.$route.params['currentRover']}}</span></span>
-      <br />
-      <span>Sol: <span class="font-weight-bold">{{this.$route.params['sol']}}</span></span>
-      <br />
-      <span v-if="photos[currentPhotoIndex] !== undefined">Earth date: <span class="font-weight-bold">{{photos[currentPhotoIndex].earthDate}}</span></span>
-      <br />
-      <span v-if="photos[currentPhotoIndex] !== undefined">
-        Camera:
-        <span class="font-weight-bold">
-          {{photos[currentPhotoIndex].camera._fullName}} ({{photos[currentPhotoIndex].camera._name}})
+      <div class="photo-info">
+        <span>Rover: <span class="text-capitalize font-weight-bold">{{this.$route.params['currentRover']}}</span></span>
+        <br />
+        <span>Sol: <span class="font-weight-bold">{{this.$route.params['sol']}}</span></span>
+        <br />
+        <span v-if="photos[currentPhotoIndex] !== undefined">Earth date: <span class="font-weight-bold">{{photos[currentPhotoIndex].earthDate}}</span></span>
+        <br />
+        <span v-if="photos[currentPhotoIndex] !== undefined">
+          Camera:
+          <span class="font-weight-bold">
+            {{photos[currentPhotoIndex].camera._fullName}} ({{photos[currentPhotoIndex].camera._name}})
+          </span>
         </span>
-      </span>
-    </div>
-    <div class="sol-buttons">
-      <b-button class="sol-button" variant="secondary lg" @click="prevSol">
-        <icon name="caret-left"></icon>
-      </b-button>
-      <b-button class="sol-button" variant="secondary lg" @click="nextSol">
-        <icon name="caret-right"></icon>
-      </b-button>
+      </div>
+      <div class="buttons">
+        <div class="sol-button button" @click="prevSol">
+          <icon name="caret-left" class="sol-button" scale="2.5"></icon>
+        </div>
+        <div class="sol-button button" @click="nextSol">
+          <icon name="caret-right" class="sol-button" scale="2.5"></icon>
+        </div>
+        <div v-if="this.$root.authenticated">
+          <div v-if="favourite" @click="removeFavouritePhoto()" class="fav-button button">
+            <icon name="star" scale="2.5"></icon>
+          </div>
+          <div v-else @click="addFavouritePhoto()" class="fav-button button">
+            <icon name="star-o" scale="2.5"></icon>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -64,9 +74,11 @@
         'photos': [],
         'nextPagePhotos': [],
         'prevPagePhotos': [],
+        'favPhotos': [],
         'currentPhotoIndex': 0,
         'availableSols': [],
         'loading': true,
+        'favourite': false,
       }
     },
     created() {
@@ -86,9 +98,9 @@
         this.$data.loading = true;
         this.fetchPhotosPage(this.$data.page,
         response => {
-          console.log(response);
           this.$data.photos = PhotoService.parsePhotos(response);
           this.loading = false;
+          this.fetchFavouritePhotos()
         },
         error => {
           console.log(error);
@@ -111,6 +123,54 @@
           onError);
       },
 
+      fetchFavouritePhotos() {
+        if(this.$root.authenticated) {
+          PhotoService.getUserPhotos
+          (response => {
+              this.$data.favPhotos = response.data;
+              this.$data.favourite = this.isFavouritePhoto();
+            },
+            error => {
+              console.log(error);
+            })
+        }
+      },
+
+      addFavouritePhoto() {
+        if(this.$root.authenticated) {
+          let currentPhoto = this.$data.photos[this.$data.currentPhotoIndex];
+          PhotoService.addUserPhoto(
+            currentPhoto.id,
+            currentPhoto.rover._name,
+            currentPhoto.sol,
+            currentPhoto.camera._name,
+            currentPhoto.imgSrc,
+            response => {
+              this.fetchFavouritePhotos();
+            },
+            error => {
+              console.log(error);
+            });
+        }
+      },
+
+      removeFavouritePhoto() {
+        if(this.$root.authenticated) {
+          let currentPhoto = this.$data.photos[this.$data.currentPhotoIndex];
+          PhotoService.removeUserPhoto(currentPhoto.id,
+          response => {
+            let index = this.$data.favPhotos.findIndex(p => p.id == currentPhoto.id);
+            if(index !== -1) {
+              this.$data.favPhotos.splice(index, 1);
+              this.$data.favourite = false;
+            }
+          },
+          error => {
+            console.log(error);
+          });
+        }
+      },
+
       /**
        * Callback invoked when no photos for a given $route.params['sol'] and $route.params['camera'].
        * Redirects to the nearest sol.
@@ -121,7 +181,6 @@
         if(nearestSol === -1) {
           console.log("ERROR");
         } else {
-          console.log(nearestSol);
           this.$router.replace({
             params: {
               sol: nearestSol
@@ -177,6 +236,7 @@
             this.$data.page--;
           }
         }
+        this.$data.favourite = this.isFavouritePhoto();
       },
 
       /**
@@ -206,6 +266,7 @@
               });
           }
         }
+        this.$data.favourite = this.isFavouritePhoto();
       },
 
       /**
@@ -283,6 +344,14 @@
 
       loaded() {
         this.$data.loading = false;
+      },
+
+      isFavouritePhoto() {
+        if(this.$data.photos[this.$data.currentPhotoIndex] != null) {
+          return this.$root.authenticated &&
+            this.$data.favPhotos.find(p => p.id == this.$data.photos[this.$data.currentPhotoIndex].id) != null;
+        }
+        return false;
       }
     },
     watch: {
@@ -344,26 +413,34 @@
   }
 
   .photo-info-box {
-    display: block;
-    position: fixed;
-    bottom: 76px;
-    left: 0;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.7);
-    max-width: 30vw;
-  }
-
-  .sol-buttons {
     display: flex;
+    flex-flow: column;
     position: fixed;
     bottom: 16px;
     left: 0;
     padding: 15px;
+    max-width: 30vw;
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .button:hover, .button:active, .button:focus {
+    cursor: pointer;
+  }
+
+  .buttons {
+    display: flex;
     flex-flow: row;
+    justify-content: left;
+    align-items: center;
   }
 
   .sol-button {
     margin: 3px;
   }
+
+  .fav-button {
+    margin-left: 10px;
+  }
+
 
 </style>

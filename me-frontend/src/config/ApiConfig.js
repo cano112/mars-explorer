@@ -4,6 +4,7 @@ const _BASE_PROXY_URI = _BASE_API_URI + "nasa/";
 
 export const LOGIN_URL = HOST + "login/facebook";
 export const USER_URI = _BASE_API_URI + "user";
+export const USER_PHOTOS_URI = _BASE_API_URI + "photos";
 export const LOGOUT_URL = HOST + "logout";
 
 export const URIs = {

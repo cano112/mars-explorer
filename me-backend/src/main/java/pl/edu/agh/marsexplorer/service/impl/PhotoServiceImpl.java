@@ -19,8 +19,10 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public void addPhoto(User user, Photo photo) {
-        user.addPhoto(photo);
-        userRepository.save(user);
+        if(user.getPhotos().stream().noneMatch(p -> p.getId().equals(photo.getId()))) {
+            user.addPhoto(photo);
+            userRepository.save(user);
+        }
     }
 
     @Override

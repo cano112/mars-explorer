@@ -2,11 +2,14 @@ package pl.edu.agh.marsexplorer.model.domain;
 
 import com.google.common.base.Objects;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 public class Photo {
 
     @Id
+    @Indexed(unique = true)
     private String id;
+
     private Rover rover;
     private CameraType cameraType;
     private int sol;

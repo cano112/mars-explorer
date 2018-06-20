@@ -1,9 +1,11 @@
 package pl.edu.agh.marsexplorer.api.v1;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.agh.marsexplorer.model.domain.Photo;
+import pl.edu.agh.marsexplorer.service.PhotoService;
 import pl.edu.agh.marsexplorer.service.UserService;
 
 import java.util.List;
@@ -12,8 +14,12 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class PhotosController extends BaseController {
 
-    protected PhotosController(UserService userService) {
+    private final PhotoService photoService;
+
+    @Autowired
+    protected PhotosController(UserService userService, PhotoService photoService) {
         super(userService);
+        this.photoService = photoService;
     }
 
     @GetMapping("photos")
@@ -25,12 +31,12 @@ public class PhotosController extends BaseController {
     @PostMapping("photos")
     @PreAuthorize("hasRole('ROLE_USER')")
     public void addPhoto(@RequestBody Photo request, OAuth2Authentication principal) {
-        getCurrentUser(principal).addPhoto(request);
+        photoService.addPhoto(getCurrentUser(principal), request);
     }
 
     @DeleteMapping("photos/{photo_id}")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public void addPhoto(@PathVariable("photo_id") String photoId, OAuth2Authentication principal) {
-        getCurrentUser(principal).removePhoto(photoId);
+    public void removePhoto(@PathVariable("photo_id") String photoId, OAuth2Authentication principal) {
+        photoService.removePhoto(getCurrentUser(principal), photoId);
     }
 }

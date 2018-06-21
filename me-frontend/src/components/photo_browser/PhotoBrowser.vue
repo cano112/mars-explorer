@@ -417,7 +417,7 @@
 
           // on sol or rover or camera change
           if (to.params['sol'] !== from.params['sol']
-            || to.params['rover'] !== from.params['rover']
+            || to.params['currentRover'] !== from.params['currentRover']
             || to.params['camera'] !== from.params['camera']) {
             this.onRoverSolCameraChange();
           }

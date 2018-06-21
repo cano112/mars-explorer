@@ -25,18 +25,29 @@
     created() {
       UserService.getUserData(
         response => {
-        this.$root.authenticated = true;
-        this.$root.userName = response.name;
-        this.$root.userId = response.id;
+          if(response.name !== 'guest') {
+            this.setAuthenticated(response);
+          } else {
+            this.setUnauthenticated();
+          }
         },
         error => {
-          this.$root.authenticated = false;
-          this.$root.userName = '';
-          this.$root.userId = '';
+          this.setUnauthenticated();
         }
       );
     },
     methods: {
+      setAuthenticated(response) {
+        this.$root.authenticated = true;
+        this.$root.userName = response.name;
+        this.$root.userId = response.id;
+      },
+
+      setUnauthenticated() {
+        this.$root.authenticated = false;
+        this.$root.userName = '';
+        this.$root.userId = '';
+      }
     },
     components: {
       'photo-browser': PhotoBrowser,

@@ -115,7 +115,6 @@
        * @param onError callback on failed request
        */
       fetchPhotosPage(page, onSuccess, onError) {
-        console.log(page);
         PhotoService.getRoverPhotos(
           this.$route.params['currentRover'],
           this.$route.params['camera'],
@@ -381,7 +380,7 @@
         this.$data.loading = true;
         this.fetchPhotosPage(this.$data.page,
           response => {
-          if(response.data.photos.length === 0) {
+          if(response.data.photos.length === 0 && this.$data.page > 1) {
             this.$router.replace({params: {page: this.$data.page-1, index: 24}})
           } else {
             this.$data.photos = PhotoService.parsePhotos(response);
@@ -389,7 +388,7 @@
             this.$data.loading = false;
           }},
           error => {
-            console.log(error);
+            this.$router.replace('/error');
           })
       }
     },

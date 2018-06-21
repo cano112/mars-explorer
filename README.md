@@ -1,6 +1,8 @@
 # Mars explorer
 
-https://mars-x.herokuapp.com/
+App: https://mars-x.herokuapp.com/
+
+Docs: https://cano112.github.io/mars-explorer-docs/
 
 ## Build & run
 

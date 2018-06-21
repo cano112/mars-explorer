@@ -1,7 +1,10 @@
 <template>
   <div id="app-template">
     <nav-bar :rovers="rovers"></nav-bar>
-    <photo-browser></photo-browser>
+    <div class="content">
+      <router-view></router-view>
+    </div>
+
   </div>
 </template>
 
@@ -43,5 +46,7 @@
 </script>
 
 <style>
-
+  .content {
+    margin: 5px;
+  }
 </style>

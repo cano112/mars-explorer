@@ -6,6 +6,9 @@ import pl.edu.agh.marsexplorer.service.UserService;
 
 import java.util.Map;
 
+/**
+ * Base API's controller class. All API's controllers should extend it.
+ */
 public abstract class BaseController {
 
     private final UserService userService;
@@ -14,6 +17,12 @@ public abstract class BaseController {
         this.userService = userService;
     }
 
+    /**
+     * Get current logged user. Supports {@link OAuth2Authentication} only.
+     * @param principal principal object, injected by Spring Security
+     * @return user model object
+     * @throws UnsupportedOperationException when unsupported auth object
+     */
     @SuppressWarnings("unchecked")
     protected User getCurrentUser(OAuth2Authentication principal) {
         if(principal.getUserAuthentication().getDetails() instanceof Map) {

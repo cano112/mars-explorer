@@ -1,6 +1,7 @@
 package pl.edu.agh.marsexplorer.api.v1;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ public class PhotosController extends BaseController {
     }
 
     @PostMapping("photos")
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_USER')")
     public void addPhoto(@RequestBody Photo request, OAuth2Authentication principal) {
         photoService.addPhoto(getCurrentUser(principal), request);

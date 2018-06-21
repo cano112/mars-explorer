@@ -70,13 +70,13 @@
     props: [],
     data() {
       return {
-        'page': 1,
         'photos': [],
         'nextPagePhotos': [],
         'prevPagePhotos': [],
         'favPhotos': [],
-        'currentPhotoIndex': 0,
         'availableSols': [],
+        'currentPhotoIndex': parseInt(this.$route.params['index']),
+        'page': parseInt(this.$route.params['page']),
         'loading': true,
         'favourite': false,
       }
@@ -93,6 +93,7 @@
        * Fetch a single photos page.
        * Uses: $data.page, $route.params['currentRover'], $route.params['camera'], this.$route.params['sol'].
        * Photos are placed into $data.photos.
+       * Redirects to /error on error.
        */
       fetchImages() {
         this.$data.loading = true;
@@ -100,10 +101,10 @@
         response => {
           this.$data.photos = PhotoService.parsePhotos(response);
           this.loading = false;
-          this.fetchFavouritePhotos()
+          this.fetchFavouritePhotos();
         },
         error => {
-          console.log(error);
+          this.$router.replace('/error');
         });
       },
 
@@ -114,6 +115,7 @@
        * @param onError callback on failed request
        */
       fetchPhotosPage(page, onSuccess, onError) {
+        console.log(page);
         PhotoService.getRoverPhotos(
           this.$route.params['currentRover'],
           this.$route.params['camera'],
@@ -123,6 +125,10 @@
           onError);
       },
 
+      /**
+       * Fetch user's saved photos to $data.favPhotos and set $data.favourite flag.
+       * Redirects to /error on error.
+       */
       fetchFavouritePhotos() {
         if(this.$root.authenticated) {
           PhotoService.getUserPhotos
@@ -131,11 +137,15 @@
               this.$data.favourite = this.isFavouritePhoto();
             },
             error => {
-              console.log(error);
+              this.$router.replace('/error');
             })
         }
       },
 
+      /**
+       * Add current photo to user's saved photos.
+       * Redirects to /error on error.
+       */
       addFavouritePhoto() {
         if(this.$root.authenticated) {
           let currentPhoto = this.$data.photos[this.$data.currentPhotoIndex];
@@ -144,16 +154,20 @@
             currentPhoto.rover._name,
             currentPhoto.sol,
             currentPhoto.camera._name,
-            currentPhoto.imgSrc,
+            this.$route.path,
             response => {
               this.fetchFavouritePhotos();
             },
             error => {
-              console.log(error);
+              this.$router.replace('/error');
             });
         }
       },
 
+      /**
+       * Remove current photo from user's saved photos.
+       * Redirects to /error on error.
+       */
       removeFavouritePhoto() {
         if(this.$root.authenticated) {
           let currentPhoto = this.$data.photos[this.$data.currentPhotoIndex];
@@ -166,7 +180,7 @@
             }
           },
           error => {
-            console.log(error);
+            this.$router.replace('/error');
           });
         }
       },
@@ -174,12 +188,13 @@
       /**
        * Callback invoked when no photos for a given $route.params['sol'] and $route.params['camera'].
        * Redirects to the nearest sol.
+       * Redirects to /error on error (no nearest sol found).
        * @param sols sols with a given camera
        */
       noPhotoCallback(sols) {
         let nearestSol = this.getNearestSol(this.$route.params['sol'], sols);
         if(nearestSol === -1) {
-          console.log("ERROR");
+          this.$router.replace('/error');
         } else {
           this.$router.replace({
             params: {
@@ -190,6 +205,7 @@
 
       /**
        * Fetch manifest for a given rover.
+       * Redirects to /error on error.
        * @param photoAvailableCallback callback when photo available for a given $route.params['currentRover'], this.$route.params['camera'], this.$route.params['sol']
        * @param photoNotAvailableCallback callback when photo available
        */
@@ -207,7 +223,7 @@
 
         },
         error => {
-          console.log(error);
+          this.$router.replace('/error');
         });
       },
 
@@ -215,104 +231,86 @@
        * Listener on previous photo button. Moves to previous photo in a given sol - only if available.
        */
       prevPhoto() {
-        if(this.$data.currentPhotoIndex > 0) {
+        if(this.$data.currentPhotoIndex > 0) { // not at bound
           this.$data.loading = true;
-          this.$data.currentPhotoIndex--;
-          if(this.$data.currentPhotoIndex === 0 && this.$data.page !== 1 && this.$data.prevPagePhotos.length !== 0) {
-            this.fetchPhotosPage(this.$data.page-1,
-              response => {
-                this.$data.prevPagePhotos = PhotoService.parsePhotos(response);
-              },
-              error => {
-                console.log(error);
-              });
-          }
+          this.$router.push({params: {index: this.$data.currentPhotoIndex-1}});
         } else {
-          if(this.$data.prevPagePhotos.length !== 0) {
-            this.$data.currentPhotoIndex = this.$data.prevPagePhotos.length-1;
-            this.$data.nextPagePhotos = this.$data.photos;
-            this.$data.photos = this.$data.prevPagePhotos;
-            this.$data.prevPagePhotos = [];
-            this.$data.page--;
+          if(this.$data.currentPhotoIndex === 0 && this.$data.page >= 2) { // at left-side bound
+            this.$data.loading = true;
+            this.$router.push({params: {page: this.$data.page-1, index: 24}})
           }
         }
-        this.$data.favourite = this.isFavouritePhoto();
       },
 
       /**
        * Listener on next photo button. Moves to next photo in a given sol - only if available.
        */
       nextPhoto() {
-        if(this.$data.currentPhotoIndex >= this.$data.photos.length-1) {
-          if(this.$data.nextPagePhotos.length !== 0) {
-            this.$data.currentPhotoIndex = 0;
-            this.$data.prevPagePhotos = this.$data.photos;
-            this.$data.photos = this.$data.nextPagePhotos;
-            this.$data.nextPagePhotos = [];
-            this.$data.page++;
-          }
-        } else {
+        if(this.$data.currentPhotoIndex < this.$data.photos.length-1) { // not at bound
           this.$data.loading = true;
-          this.$data.currentPhotoIndex++;
-          if(this.$data.currentPhotoIndex === this.$data.photos.length-1) {
-            this.fetchPhotosPage(this.$data.page+1,
-              response => {
-                if(response.data.photos.length !== 0) {
-                  this.$data.nextPagePhotos = PhotoService.parsePhotos(response);
-                }
-              },
-              error => {
-                console.log(error);
-              });
+          this.$router.push({params: {index: this.$data.currentPhotoIndex+1}});
+        } else {
+          if(this.$data.currentPhotoIndex === 24) {  // at right-side bound
+            this.$data.loading = true;
+            this.$router.push({params: {page: this.$data.page+1, index: 0}})
           }
         }
-        this.$data.favourite = this.isFavouritePhoto();
       },
 
       /**
        * Listener on previous sol button. Moves to previous sol from $data.availableSols - only if available.
+       * Redirects to /error on error (no nearest sol found).
        */
       prevSol() {
         let currentSolIndex = this.$data.availableSols.indexOf(parseInt(this.$route.params['sol']));
         if(currentSolIndex === -1) {
           let nearestSol = this.getNearestSol(this.$route.params['sol'], this.$data.availableSols);
           if(nearestSol === -1) {
-            console.log("ERROR");
+            this.$router.replace('/error');
           } else {
             this.$router.push({
               params: {
-                sol: nearestSol
+                sol: nearestSol,
+                page: 1,
+                index: 0
               }});
           }
         }
         if(currentSolIndex > 0) {
           this.$router.push({
             params: {
-              sol: this.$data.availableSols[currentSolIndex-1]
+              sol: this.$data.availableSols[currentSolIndex-1],
+              page: 1,
+              index: 0
             }});
         }
       },
 
       /**
        * Listener on next sol button. Moves to next sol from $data.availableSols - only if available.
+       * Redirects to /error on error (no nearest sol found).
        */
       nextSol() {
         let currentSolIndex = this.$data.availableSols.indexOf(parseInt(this.$route.params['sol']));
         if(currentSolIndex === -1) {
           let nearestSol = this.getNearestSol(this.$route.params['sol'], this.$data.availableSols);
           if(nearestSol === -1) {
-            console.log("ERROR");
+            this.$router.replace('/error');
           } else {
             this.$router.push({
               params: {
-                sol: nearestSol
+                sol: nearestSol,
+                page: 1,
+                index: 0
               }});
           }
         }
         if(currentSolIndex < this.$data.availableSols.length-1) {
           this.$router.push({
             params: {
-              sol: this.$data.availableSols[currentSolIndex+1]
+              sol: this.$data.availableSols[currentSolIndex+1],
+              page: 1,
+              index: 0
             }});
         }
       },
@@ -329,7 +327,13 @@
           .map(p => p.sol)
       },
 
-        getNearestSol(sol, sols) {
+      /**
+       * Find nearest sol (last sol before the given one) in a given sols list.
+       * @param sol reference sol
+       * @param sols sols list
+       * @returns {number} nearest sol
+       */
+      getNearestSol(sol, sols) {
         if(sols.length === 0) {
           return -1;
         }
@@ -342,33 +346,84 @@
         return sols[sols.length-1];
       },
 
+      /**
+       * Listener on image load event. Sets $data.loading flag to false.
+       */
       loaded() {
         this.$data.loading = false;
       },
 
+      /**
+       * Check if current photo is on user's saved photos list.
+       * @return {boolean} true if current photo is on user's saved photos list
+       */
       isFavouritePhoto() {
         if(this.$data.photos[this.$data.currentPhotoIndex] != null) {
           return this.$root.authenticated &&
             this.$data.favPhotos.find(p => p.id == this.$data.photos[this.$data.currentPhotoIndex].id) != null;
         }
         return false;
+      },
+
+      /**
+       * Listener on route change. Fired when rover or sol or camera changes.
+       */
+      onRoverSolCameraChange() {
+        this.$data.availableSols = [];
+        this.loading = true;
+        this.fetchManifest(this.fetchImages, this.noPhotoCallback);
+      },
+
+      /**
+       * Listener on route change. Fired when page changes.
+       */
+      onPageChange(onSuccess) {
+        this.$data.loading = true;
+        this.fetchPhotosPage(this.$data.page,
+          response => {
+          if(response.data.photos.length === 0) {
+            this.$router.replace({params: {page: this.$data.page-1, index: 24}})
+          } else {
+            this.$data.photos = PhotoService.parsePhotos(response);
+            onSuccess();
+            this.$data.loading = false;
+          }},
+          error => {
+            console.log(error);
+          })
       }
     },
     watch: {
       /**
        * Watch route change
-       * @param to
-       * @param from
+       * @param to current route
+       * @param from previous route
        */
-        $route(to, from) {
-          this.$data.currentPhotoIndex = 0;
-          this.$data.page = 1;
-          this.$data.prevPagePhotos = [];
-          this.$data.nextPagePhotos = [];
-          this.$data.availableSols = [];
-          this.loading = true;
-          this.fetchManifest(this.fetchImages, this.noPhotoCallback);
+      $route(to, from) {
+        if (to != null && from != null) {
+
+          // always
+          this.page = parseInt(to.params['page']);
+
+          // on page change
+          if(to.params['page'] !== from.params['page']) {
+            this.onPageChange(() => {
+              this.currentPhotoIndex = parseInt(to.params['index']);
+              this.fetchFavouritePhotos();
+            });
+          } else {
+            this.currentPhotoIndex = parseInt(to.params['index']);
+            this.fetchFavouritePhotos();
+          }
+
+          // on sol or rover or camera change
+          if (to.params['sol'] !== from.params['sol']
+            || to.params['rover'] !== from.params['rover']
+            || to.params['camera'] !== from.params['camera']) {
+            this.onRoverSolCameraChange();
+          }
         }
+      }
     }
   }
 </script>
@@ -403,7 +458,6 @@
 
   .mars-image-container {
     position: relative;
-    margin: 5px;
   }
 
   .mars-image-placeholder {
@@ -441,6 +495,4 @@
   .fav-button {
     margin-left: 10px;
   }
-
-
 </style>

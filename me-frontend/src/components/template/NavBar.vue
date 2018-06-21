@@ -11,7 +11,7 @@
           </template>
           <b-dropdown-item v-for="camera in cameras[roverName.toLowerCase()]"
                            :key="camera"
-                           :to="`/browser/${roverName.toLowerCase()}/${camera.toLowerCase()}/0`">
+                           :to="`/browser/${roverName.toLowerCase()}/${camera.toLowerCase()}/0/1/0`">
             {{camera.toUpperCase()}}
           </b-dropdown-item>
         </b-nav-item-dropdown>
@@ -26,7 +26,7 @@
           <template slot="button-content">
             {{this.$root.userName}}
           </template>
-          <b-dropdown-item href="#">Profile</b-dropdown-item>
+          <b-dropdown-item to="/saved">Saved photos</b-dropdown-item>
           <b-dropdown-item @click="logout()">Logout</b-dropdown-item>
         </b-nav-item-dropdown>
       </b-navbar-nav>

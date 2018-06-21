@@ -1,7 +1,6 @@
 package pl.edu.agh.marsexplorer.model.domain;
 
 public enum CameraType {
-
     FHAZ("Front Hazard Avoidance Camera"),
     RHAZ("Rear Hazard Avoidance Camera"),
     MAST("Mast Camera"),

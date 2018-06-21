@@ -27,6 +27,7 @@ public class NasaApiProxyService implements ProxyService {
         this.apiUrl = apiUrl;
         this.restTemplate = restTemplate;
     }
+
     public String redirectRequest(String requestBody, HttpMethod httpMethod, String resourceString, String queryString) {
        URI uri = createApiRequestUri(resourceString, queryString);
 

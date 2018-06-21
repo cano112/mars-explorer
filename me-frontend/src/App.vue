@@ -1,14 +1,16 @@
 <template>
   <div id="viewPort">
     <div id="app" >
-      <router-view></router-view>
+      <app-template></app-template>
     </div>
   </div>
 </template>
 
 <script>
+  import AppTemplate from "./components/template/AppTemplate";
   export default {
     name: 'app',
+    components: {AppTemplate},
   }
 </script>
 

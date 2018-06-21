@@ -3,7 +3,6 @@ package pl.edu.agh.marsexplorer.api.v1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,6 @@ public class UserController extends BaseController {
         super(userService);
     }
 
-    @CrossOrigin //TODO: make secure in prod
     @GetMapping("user")
     @PreAuthorize("hasRole('ROLE_USER')")
     public User user(OAuth2Authentication principal) {

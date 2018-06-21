@@ -16,7 +16,8 @@ public class Photo {
     private String url;
 
     public Photo() {}
-    public Photo(String url, Rover rover, CameraType cameraType, int sol) {
+    public Photo(String id, String url, Rover rover, CameraType cameraType, int sol) {
+        this.id = id;
         this.url = url;
         this.rover = rover;
         this.cameraType = cameraType;
